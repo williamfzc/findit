@@ -44,12 +44,27 @@ class FindIt(object):
         pic_name = self.get_pic_name(target_pic_path)
         target_pic = load_grey_from_path(target_pic_path)
         for each_template_name, each_template in self.template.items():
-            self.result[each_template_name] = self.compare(target_pic, each_template)
+            min_val, max_val, min_loc, max_loc = self.compare(target_pic, each_template)
+            min_loc, max_loc = map(lambda i: self.fix_location(each_template, i), [min_loc, max_loc])
+            self.result[each_template_name] = {
+                'min_val': min_val,
+                'max_val': max_val,
+                'min_loc': min_loc,
+                'max_loc': max_loc,
+            }
         self.target_name = pic_name
         self.target_path = target_pic_path
         return self.build_result()
 
+    @staticmethod
+    def fix_location(pic_object, location):
+        """ location from cv2 should be left-top location, and need to fix it and make it central """
+        size_x, size_y = pic_object.shape
+        old_x, old_y = location
+        return old_x + size_x / 2, old_y + size_y / 2
+
     def compare(self, pic, template_pic):
+        """ call cv2 function matchTemplate and minMaxLoc """
         res = cv2.matchTemplate(pic, template_pic, self.config.cv_method)
         return cv2.minMaxLoc(res)
 

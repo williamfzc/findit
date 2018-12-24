@@ -1,5 +1,6 @@
 from findit import FindIt
 import cv2
+import pprint
 
 
 # new one
@@ -21,4 +22,4 @@ result = fi.find('./screen2.png')
 #         }
 #     }
 # }
-print(result)
+pprint.pprint(result)
