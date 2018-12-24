@@ -24,7 +24,7 @@ class FindIt(object):
         self.target_name = None
         self.target_path = None
         # result dict
-        self.result = dict()
+        self.result = list()
 
     def get_pic_name(self, pic_path):
         """ confirm picture is existed and get its name """
@@ -35,23 +35,25 @@ class FindIt(object):
 
     def load_template(self, pic_path):
         """ load template picture """
-        pic_name = self.get_pic_name(pic_path)
-        self.template[pic_name] = load_grey_from_path(pic_path)
+        abs_path = os.path.abspath(pic_path)
+        self.template[abs_path] = load_grey_from_path(pic_path)
 
     def find(self, target_pic_path):
         """ start matching """
         assert self.template, 'template is empty'
         pic_name = self.get_pic_name(target_pic_path)
         target_pic = load_grey_from_path(target_pic_path)
-        for each_template_name, each_template in self.template.items():
+        for each_template_path, each_template in self.template.items():
             min_val, max_val, min_loc, max_loc = self.compare(target_pic, each_template)
             min_loc, max_loc = map(lambda i: self.fix_location(each_template, i), [min_loc, max_loc])
-            self.result[each_template_name] = {
+            self.result.append({
+                'name': os.path.basename(each_template_path),
+                'path': each_template_path,
                 'min_val': min_val,
                 'max_val': max_val,
                 'min_loc': min_loc,
                 'max_loc': max_loc,
-            }
+            })
         self.target_name = pic_name
         self.target_path = target_pic_path
         return self.build_result()
