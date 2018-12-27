@@ -36,7 +36,7 @@ class FindIt(object):
     def load_template(self, pic_path):
         """ load template picture """
         abs_path = os.path.abspath(pic_path)
-        self.template[abs_path] = load_grey_from_path(pic_path)
+        self.template[abs_path] = load_grey_from_path(abs_path)
 
     def find(self, target_pic_path):
         """ start matching """
@@ -46,6 +46,8 @@ class FindIt(object):
         for each_template_path, each_template in self.template.items():
             min_val, max_val, min_loc, max_loc = self.compare(target_pic, each_template)
             min_loc, max_loc = map(lambda i: self.fix_location(each_template, i), [min_loc, max_loc])
+
+            # build result
             self.result.append({
                 'name': os.path.basename(each_template_path),
                 'path': each_template_path,
@@ -55,7 +57,7 @@ class FindIt(object):
                 'max_loc': max_loc,
             })
         self.target_name = pic_name
-        self.target_path = target_pic_path
+        self.target_path = os.path.abspath(target_pic_path)
         return self.build_result()
 
     @staticmethod
