@@ -5,7 +5,7 @@ import numpy as np
 
 
 class FindItConfig(object):
-    cv_method = cv2.TM_SQDIFF_NORMED
+    cv_method = cv2.TM_CCORR_NORMED
 
 
 def load_from_path(pic_path):
@@ -41,14 +41,20 @@ class FindIt(object):
         abs_path = os.path.abspath(pic_path)
         self.template[abs_path] = load_from_path(abs_path)
 
-    def find(self, target_pic_path):
+    def find(self, target_pic_path, scale=None):
         """ start matching """
         assert self.template, 'template is empty'
-        pic_name = self.get_pic_name(target_pic_path)
-        target_pic = load_from_path(target_pic_path)
+        # TODO TM_SQDIFF & TM_SQDIFF_NORMED not supported!
+        assert self.config.cv_method not in (cv2.TM_SQDIFF_NORMED, cv2.TM_SQDIFF), \
+            'TM_SQDIFF & TM_SQDIFF_NORMED not supported'
 
+        target_pic = load_from_path(target_pic_path)
         for each_template_path, each_template in self.template.items():
-            min_val, max_val, min_loc, max_loc = self.compare(target_pic, each_template)
+            # default scale
+            if not scale:
+                scale = (1, 3, 10)
+
+            min_val, max_val, min_loc, max_loc = self.compare(target_pic, each_template, scale)
             min_loc, max_loc = map(lambda i: self.fix_location(each_template, i), [min_loc, max_loc])
 
             # build result
@@ -60,7 +66,8 @@ class FindIt(object):
                 'min_loc': min_loc,
                 'max_loc': max_loc,
             })
-        self.target_name = pic_name
+
+        self.target_name = self.get_pic_name(target_pic_path)
         self.target_path = os.path.abspath(target_pic_path)
         return self.build_result()
 
@@ -71,18 +78,31 @@ class FindIt(object):
         old_x, old_y = location
         return old_x + size_x / 2, old_y + size_y / 2
 
-    def compare(self, pic, template_pic):
-        """ call cv2 function matchTemplate and minMaxLoc """
+    def compare(self, pic, template_pic, scale):
+        """
+        match template between picture and template
+        (https://www.pyimagesearch.com/2015/01/26/multi-scale-template-matching-using-python-opencv/)
+
+        :param pic:
+        :param template_pic:
+        :param scale: default to (1, 3, 10)
+        :return:
+        """
         pic_height, pic_width = pic.shape[:2]
         result_list = list()
 
-        for scale in np.linspace(1, 3, 50):
-            resized = imutils.resize(template_pic, width=int(template_pic.shape[1] * scale))
-            if resized.shape[0] > pic_height or resized.shape[1] > pic_width:
+        for each_scale in np.linspace(*scale):
+            # resize template
+            resized_pic = imutils.resize(template_pic, width=int(template_pic.shape[1] * each_scale))
+
+            # if template's size is larger than raw picture, break
+            if resized_pic.shape[0] > pic_height or resized_pic.shape[1] > pic_width:
                 break
-            res = cv2.matchTemplate(pic, resized, self.config.cv_method)
+
+            res = cv2.matchTemplate(pic, resized_pic, self.config.cv_method)
             result_list.append(cv2.minMaxLoc(res))
 
+        # return the max one
         return sorted(result_list, key=lambda i: i[1])[-1]
 
     def build_result(self):
