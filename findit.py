@@ -1,14 +1,17 @@
 import cv2
 import os
+import imutils
+import numpy as np
 
 
 class FindItConfig(object):
     cv_method = cv2.TM_SQDIFF_NORMED
 
 
-def load_grey_from_path(pic_path):
+def load_from_path(pic_path):
     """ load grey picture (with cv2) from path """
     raw_img = cv2.imread(pic_path)
+    raw_img = raw_img.astype(np.uint8)
     grey_img = cv2.cvtColor(raw_img, cv2.COLOR_BGR2GRAY)
     return grey_img
 
@@ -36,13 +39,14 @@ class FindIt(object):
     def load_template(self, pic_path):
         """ load template picture """
         abs_path = os.path.abspath(pic_path)
-        self.template[abs_path] = load_grey_from_path(abs_path)
+        self.template[abs_path] = load_from_path(abs_path)
 
     def find(self, target_pic_path):
         """ start matching """
         assert self.template, 'template is empty'
         pic_name = self.get_pic_name(target_pic_path)
-        target_pic = load_grey_from_path(target_pic_path)
+        target_pic = load_from_path(target_pic_path)
+
         for each_template_path, each_template in self.template.items():
             min_val, max_val, min_loc, max_loc = self.compare(target_pic, each_template)
             min_loc, max_loc = map(lambda i: self.fix_location(each_template, i), [min_loc, max_loc])
@@ -69,8 +73,17 @@ class FindIt(object):
 
     def compare(self, pic, template_pic):
         """ call cv2 function matchTemplate and minMaxLoc """
-        res = cv2.matchTemplate(pic, template_pic, self.config.cv_method)
-        return cv2.minMaxLoc(res)
+        pic_height, pic_width = pic.shape[:2]
+        result_list = list()
+
+        for scale in np.linspace(1, 3, 50):
+            resized = imutils.resize(template_pic, width=int(template_pic.shape[1] * scale))
+            if resized.shape[0] > pic_height or resized.shape[1] > pic_width:
+                break
+            res = cv2.matchTemplate(pic, resized, self.config.cv_method)
+            result_list.append(cv2.minMaxLoc(res))
+
+        return sorted(result_list, key=lambda i: i[1])[-1]
 
     def build_result(self):
         """ build final result dict """

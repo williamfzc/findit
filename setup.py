@@ -11,5 +11,7 @@ setup(
     py_modules=['findit'],
     install_requires=[
         'opencv-python',
+        'imutils',
+        'numpy',
     ]
 )
