@@ -29,26 +29,25 @@ class FindIt(object):
         # result dict
         self.result = list()
 
-    def get_pic_name(self, pic_path):
-        """ confirm picture is existed and get its name """
-        assert os.path.isfile(pic_path), 'picture not found: {}'.format(pic_path)
-        pic_name = os.path.basename(pic_path)
-        assert pic_name not in self.template, 'picture already existed'
-        return pic_name
-
     def load_template(self, pic_path):
         """ load template picture """
         abs_path = os.path.abspath(pic_path)
         self.template[abs_path] = load_from_path(abs_path)
 
-    def find(self, target_pic_path, scale=None):
+    def find(self, target_pic_path=None, target_cv_object=None, scale=None):
         """ start matching """
         assert self.template, 'template is empty'
         # TODO TM_SQDIFF & TM_SQDIFF_NORMED not supported!
         assert self.config.cv_method not in (cv2.TM_SQDIFF_NORMED, cv2.TM_SQDIFF), \
             'TM_SQDIFF & TM_SQDIFF_NORMED not supported'
+        assert (target_pic_path is not None) or (target_cv_object is not None), 'need path or cv object'
 
-        target_pic = load_from_path(target_pic_path)
+        # load target
+        if target_cv_object is not None:
+            target_pic = target_cv_object
+        else:
+            target_pic = load_from_path(target_pic_path)
+
         for each_template_path, each_template in self.template.items():
             # default scale
             if not scale:
@@ -59,7 +58,6 @@ class FindIt(object):
 
             # build result
             self.result.append({
-                'name': os.path.basename(each_template_path),
                 'path': each_template_path,
                 'min_val': min_val,
                 'max_val': max_val,
@@ -67,7 +65,6 @@ class FindIt(object):
                 'max_loc': max_loc,
             })
 
-        self.target_name = self.get_pic_name(target_pic_path)
         self.target_path = os.path.abspath(target_pic_path)
         return self.build_result()
 
@@ -108,7 +105,6 @@ class FindIt(object):
     def build_result(self):
         """ build final result dict """
         final_result = dict()
-        final_result['target_name'] = self.target_name
         final_result['target_path'] = self.target_path
         final_result['config'] = self.config.__dict__
         final_result['data'] = self.result
