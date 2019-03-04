@@ -29,8 +29,15 @@ class FindIt(object):
         # result dict
         self.result = list()
 
-    def load_template(self, pic_path):
+    def load_template(self, pic_path=None, pic_object=None):
         """ load template picture """
+        assert pic_path or pic_object, 'need path or cv object'
+        if pic_object:
+            # pic_object: ('pic_name', cv_object)
+            pic_name = pic_object[0]
+            pic_data = pic_object[1]
+            self.template[pic_name] = pic_data
+            return
         abs_path = os.path.abspath(pic_path)
         self.template[abs_path] = load_from_path(abs_path)
 
@@ -40,7 +47,7 @@ class FindIt(object):
         # TODO TM_SQDIFF & TM_SQDIFF_NORMED not supported!
         assert self.config.cv_method not in (cv2.TM_SQDIFF_NORMED, cv2.TM_SQDIFF), \
             'TM_SQDIFF & TM_SQDIFF_NORMED not supported'
-        assert (target_pic_path is not None) or (target_cv_object is not None), 'need path or cv object'
+        assert target_pic_path or target_cv_object, 'need path or cv object'
 
         # load target
         if target_cv_object is not None:
