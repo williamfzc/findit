@@ -23,11 +23,6 @@ class FindIt(object):
         # template pic dict,
         # { pic_name: pic_cv_object }
         self.template = dict()
-        # target picture path
-        self.target_name = None
-        self.target_path = None
-        # result dict
-        self.result = list()
 
     def load_template(self, pic_path=None, pic_object=None):
         """ load template picture """
@@ -44,7 +39,6 @@ class FindIt(object):
     def find(self, target_pic_path=None, target_cv_object=None, scale=None):
         """ start matching """
         assert self.template, 'template is empty'
-        # TODO TM_SQDIFF & TM_SQDIFF_NORMED not supported!
         assert self.config.cv_method not in (cv2.TM_SQDIFF_NORMED, cv2.TM_SQDIFF), \
             'TM_SQDIFF & TM_SQDIFF_NORMED not supported'
         assert (target_pic_path is not None) or (target_cv_object is not None), 'need path or cv object'
@@ -55,6 +49,7 @@ class FindIt(object):
         else:
             target_pic = load_from_path(target_pic_path)
 
+        result = list()
         for each_template_path, each_template in self.template.items():
             # default scale
             if not scale:
@@ -63,8 +58,8 @@ class FindIt(object):
             min_val, max_val, min_loc, max_loc = self.compare(target_pic, each_template, scale)
             min_loc, max_loc = map(lambda i: self.fix_location(each_template, i), [min_loc, max_loc])
 
-            # build result
-            self.result.append({
+            # add to result list
+            result.append({
                 'path': each_template_path,
                 'min_val': min_val,
                 'max_val': max_val,
@@ -72,8 +67,8 @@ class FindIt(object):
                 'max_loc': max_loc,
             })
 
-        self.target_path = target_pic_path
-        return self.build_result()
+        self.reset()
+        return self.build_result(target_pic_path, result)
 
     @staticmethod
     def fix_location(pic_object, location):
@@ -109,11 +104,15 @@ class FindIt(object):
         # return the max one
         return sorted(result_list, key=lambda i: i[1])[-1]
 
-    def build_result(self):
+    def build_result(self, target_path, result):
         """ build final result dict """
-        final_result = dict()
-        final_result['target_path'] = self.target_path
-        final_result['config'] = self.config.__dict__
-        final_result['data'] = self.result
 
-        return final_result
+        return {
+            'target_path': target_path,
+            'config': self.config.__dict__,
+            'data': result,
+        }
+
+    def reset(self):
+        """ reset template, target and result """
+        self.template = dict()
