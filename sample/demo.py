@@ -25,3 +25,7 @@ result = fi.find('./wechat_screen.png', scale=(1, 3, 10))
 #     }
 # }
 pprint.pprint(result)
+
+# assert (take this as a test case ..)
+assert 'data' in result
+assert result['data']['max_val'] > 0.98
