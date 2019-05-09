@@ -11,7 +11,11 @@ class FindItConfig(object):
 def load_from_path(pic_path):
     """ load grey picture (with cv2) from path """
     raw_img = cv2.imread(pic_path)
-    raw_img = raw_img.astype(np.uint8)
+    return prepare_pic(raw_img)
+
+
+def prepare_pic(pic_object):
+    raw_img = pic_object.astype(np.uint8)
     grey_img = cv2.cvtColor(raw_img, cv2.COLOR_BGR2GRAY)
     return grey_img
 
@@ -31,7 +35,7 @@ class FindIt(object):
             # pic_object: ('pic_name', cv_object)
             pic_name = pic_object[0]
             pic_data = pic_object[1]
-            self.template[pic_name] = pic_data
+            self.template[pic_name] = prepare_pic(pic_data)
             return
         abs_path = os.path.abspath(pic_path)
         self.template[abs_path] = load_from_path(abs_path)
@@ -45,7 +49,7 @@ class FindIt(object):
 
         # load target
         if target_cv_object is not None:
-            target_pic = target_cv_object
+            target_pic = prepare_pic(target_cv_object)
         else:
             target_pic = load_from_path(target_pic_path)
 
