@@ -32,7 +32,7 @@ class FindItConfig(object):
 class FindIt(object):
     def __init__(self):
         # config
-        self.config: FindItConfig = FindItConfig()
+        self.config = FindItConfig()
 
         # template pic dict,
         # { pic_name: pic_cv_object }
