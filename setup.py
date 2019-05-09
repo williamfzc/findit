@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='findit',
-    version='0.2.2',
+    version='0.2.3',
     description='find target icon on your picture, and get its position',
     author='williamfzc',
     author_email='fengzc@vip.qq.com',
