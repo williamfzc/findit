@@ -14,7 +14,12 @@ def load_grey_from_path(pic_path: str) -> np.ndarray:
 def load_grey_from_cv2_object(pic_object: np.ndarray) -> np.ndarray:
     """ preparation for cv2 object (force turn it into gray) """
     pic_object = pic_object.astype(np.uint8)
-    grey_pic = cv2.cvtColor(pic_object, cv2.COLOR_BGR2GRAY)
+    try:
+        # try to turn it into grey
+        grey_pic = cv2.cvtColor(pic_object, cv2.COLOR_BGR2GRAY)
+    except cv2.error:
+        # already grey
+        return pic_object
     return grey_pic
 
 
