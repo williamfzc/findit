@@ -28,4 +28,4 @@ pprint.pprint(result)
 
 # assert (take this as a test case ..)
 assert 'data' in result
-assert result['data']['max_val'] > 0.98
+assert result['data'][0]['max_val'] > 0.98
