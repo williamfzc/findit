@@ -9,6 +9,7 @@ setup(
     author_email='fengzc@vip.qq.com',
     url='https://github.com/williamfzc/findit',
     py_modules=['findit'],
+    python_requires=">=3.6",
     install_requires=[
         'opencv-python',
         'imutils',
