@@ -4,6 +4,10 @@ import imutils
 import numpy as np
 import typing
 
+# TODO logger
+# TODO doc
+# TODO dockerfile
+
 
 def load_grey_from_path(pic_path: str) -> np.ndarray:
     """ load grey picture (with cv2) from path """
@@ -50,12 +54,11 @@ class FindIt(object):
     """ FindIt Operator """
 
     """
-    Default cv method is TM_CCORR_NORMED, and CANNOT be changed. 
+    Default cv method is TM_CCORR_NORMED
     
     1. Opencv support only CV_TM_CCORR_NORMED & CV_TM_SQDIFF
         (https://stackoverflow.com/questions/35658323/python-opencv-matchtemplate-is-mask-feature-implemented)
     2. Personally I do not want to use SQDIFF series. Its max value is totally different from what we thought.
-    3. TM_CCORR_NORMED always (I think) works fine.
     """
     CV_METHOD_NAME = 'cv2.TM_CCORR_NORMED'
     CV_METHOD_CODE = eval(CV_METHOD_NAME)
@@ -64,6 +67,12 @@ class FindIt(object):
         # template pic dict,
         # { pic_name: pic_cv_object }
         self.template: typing.Dict[str, np.ndarray] = dict()
+
+    @classmethod
+    def set_cv_method(cls, method_name: str):
+        """ change cv method, for match template. eg: FindIt.set_cv_method('cv2.TM_CCOEFF_NORMED') """
+        cls.CV_METHOD_NAME = method_name
+        cls.CV_METHOD_CODE = eval(method_name)
 
     def load_template(self,
                       pic_path: str = None,

@@ -3,6 +3,10 @@ import cv2
 import pprint
 
 
+# default cv method is TM_CCORR_NORMED
+# you can change it like this:
+FindIt.CV_METHOD_NAME = 'cv2.TM_CCORR_NORMED'
+
 # new one
 fi = FindIt()
 
@@ -15,8 +19,8 @@ fi.load_template(pic_object_list=('wechat_logo1', pic_object))
 
 # and find it
 result = fi.find(
-    # target pic
-    'wechat_screen.png',
+    # target pic path
+    target_pic_path='wechat_screen.png',
 
     # scale will resize template picture and auto-compare
     # (1, 3, 10) means:
