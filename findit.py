@@ -83,9 +83,6 @@ class FindIt(object):
                 'max_loc': max_loc,
             })
 
-        # TODO managed by developer themselves?
-        self.reset()
-
         return {
             'target_path': target_pic_path,
             'config': self.config.__dict__,
