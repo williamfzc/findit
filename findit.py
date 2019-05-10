@@ -146,7 +146,7 @@ class FindIt(object):
         result: typing.List[dict] = list()
         for each_template_path, each_template_object in self.template.items():
             logger.debug('start analysing: [{}] ...'.format(each_template_path))
-            min_val, max_val, min_loc, max_loc = self.compare(
+            min_val, max_val, min_loc, max_loc = self._compare(
                 target_pic_object,
                 each_template_object,
                 scale,
@@ -175,11 +175,11 @@ class FindIt(object):
         logger.info('result: {}'.format(json.dumps(final_result)))
         return final_result
 
-    def compare(self,
-                target_pic_object: np.ndarray,
-                template_pic_object: np.ndarray,
-                scale: typing.Sequence,
-                mask_pic_object: np.ndarray = None) -> typing.Sequence[float]:
+    def _compare(self,
+                 target_pic_object: np.ndarray,
+                 template_pic_object: np.ndarray,
+                 scale: typing.Sequence,
+                 mask_pic_object: np.ndarray = None) -> typing.Sequence[float]:
         """
         match template between picture and template
         (https://www.pyimagesearch.com/2015/01/26/multi-scale-template-matching-using-python-opencv/)
