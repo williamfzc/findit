@@ -1,6 +1,9 @@
 from setuptools import setup
 
 
+with open('requirements.txt') as f:
+    install_requires_list = f.readlines()
+
 setup(
     name='findit',
     version='0.2.3',
@@ -10,9 +13,5 @@ setup(
     url='https://github.com/williamfzc/findit',
     py_modules=['findit'],
     python_requires=">=3.6",
-    install_requires=[
-        'opencv-python',
-        'imutils',
-        'numpy',
-    ]
+    install_requires=install_requires_list
 )
