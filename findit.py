@@ -91,7 +91,13 @@ class FindIt(object):
     def load_template(self,
                       pic_path: str = None,
                       pic_object_list: typing.Sequence = None):
-        """ load template picture """
+        """
+        load template picture
+
+        :param pic_path: eg: '../your_picture.png'
+        :param pic_object_list: eg: ('your_picture_name', your_pic_cv_object)
+        :return:
+        """
         assert (pic_path is not None) or (pic_object_list is not None), 'need path or cv object'
 
         if pic_object_list is not None:
@@ -116,11 +122,11 @@ class FindIt(object):
         """
         start match
 
-        :param target_pic_path:
-        :param target_pic_object:
-        :param mask_pic_path:
-        :param mask_pic_object:
-        :param scale:
+        :param target_pic_path: '/path/to/your/target.png'
+        :param target_pic_object: your_pic_cv_object (loaded by cv2)
+        :param mask_pic_path: '/path/to/your/target.png'
+        :param mask_pic_object: your_pic_cv_object (loaded by cv2)
+        :param scale: default to (1, 3, 10)
         :return:
         """
 

@@ -6,6 +6,8 @@
 Welcome to findit's documentation!
 =======================================
 
+sample here: https://github.com/williamfzc/findit/blob/master/sample/demo.py
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
