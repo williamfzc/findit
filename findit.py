@@ -6,7 +6,6 @@ import typing
 import json
 from loguru import logger
 
-# TODO doc
 
 # default: no log
 LOGGER_FLAG = 'findit'
@@ -49,11 +48,6 @@ def fix_location(pic_object: np.ndarray, location: typing.Sequence):
     return old_x + size_x / 2, old_y + size_y / 2
 
 
-class FindItConfig(object):
-    """ DEPRECATED: cv method is always cv2.TM_CCORR_NORMED """
-    cv_method = None
-
-
 class FindIt(object):
     """ FindIt Operator """
 
@@ -64,23 +58,34 @@ class FindIt(object):
         (https://stackoverflow.com/questions/35658323/python-opencv-matchtemplate-is-mask-feature-implemented)
     2. Personally I do not want to use SQDIFF series. Its max value is totally different from what we thought.
     """
-    CV_METHOD_NAME = 'cv2.TM_CCORR_NORMED'
-    CV_METHOD_CODE = eval(CV_METHOD_NAME)
+    DEFAULT_CV_METHOD_NAME = 'cv2.TM_CCORR_NORMED'
 
-    def __init__(self):
+    def __init__(self,
+                 cv_method_name: str = None,
+                 need_log: bool = None):
         # template pic dict,
         # { pic_name: pic_cv_object }
         self.template: typing.Dict[str, np.ndarray] = dict()
 
-    @classmethod
-    def set_cv_method(cls, method_name: str):
+        # init logger
+        self.switch_logger(bool(need_log))
+
+        # set cv method
+        self._cv_method_name: str = None
+        self._cv_method_code: int = None
+
+        if cv_method_name is None:
+            cv_method_name = self.DEFAULT_CV_METHOD_NAME
+        self.set_cv_method(cv_method_name)
+
+    def set_cv_method(self, method_name: str):
         """ change cv method, for match template. eg: FindIt.set_cv_method('cv2.TM_CCOEFF_NORMED') """
-        cls.CV_METHOD_NAME = method_name
-        cls.CV_METHOD_CODE = eval(method_name)
+        self._cv_method_name = method_name
+        self._cv_method_code = eval(method_name)
         logger.info('CV method: {}'.format(method_name))
 
-    @classmethod
-    def switch_logger(cls, status: bool):
+    @staticmethod
+    def switch_logger(status: bool):
         """ enable or disable logger """
         if status:
             logger.enable(LOGGER_FLAG)
@@ -175,7 +180,7 @@ class FindIt(object):
 
         final_result = {
             'target_path': target_pic_path,
-            'cv_method': self.CV_METHOD_NAME,
+            'cv_method': self._cv_method_name,
             'data': result,
         }
         logger.info('result: {}'.format(json.dumps(final_result)))
@@ -216,7 +221,7 @@ class FindIt(object):
             res = cv2.matchTemplate(
                 target_pic_object,
                 resize_template_pic_object,
-                self.CV_METHOD_CODE,
+                self._cv_method_code,
                 mask=resize_mask_pic_object)
             result_list.append(cv2.minMaxLoc(res))
 

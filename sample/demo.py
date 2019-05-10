@@ -3,15 +3,19 @@ import cv2
 import pprint
 
 
+# 初始化
+fi = FindIt(
+    # 可以在这里进行初始化配置
+    cv_method_name='cv2.TM_CCORR_NORMED',
+    need_log=False,
+)
+
 # 默认的匹配算法是 TM_CCORR_NORMED
-# 你可以这么修改它：
-FindIt.set_cv_method('cv2.TM_CCORR_NORMED')
+# 你也可以这么修改它：
+fi.set_cv_method('cv2.TM_CCORR_NORMED')
 
 # 可以打开日志用于调试程序（默认关闭）
-FindIt.switch_logger(True)
-
-# 初始化
-fi = FindIt()
+fi.switch_logger(True)
 
 # 加载模板
 # 1. 通过图片路径加载图片
