@@ -3,10 +3,14 @@ import os
 import imutils
 import numpy as np
 import typing
+import json
+from loguru import logger
 
-# TODO logger
 # TODO doc
-# TODO dockerfile
+
+# default: no log
+LOGGER_FLAG = 'findit'
+logger.disable(LOGGER_FLAG)
 
 
 def load_grey_from_path(pic_path: str) -> np.ndarray:
@@ -73,6 +77,16 @@ class FindIt(object):
         """ change cv method, for match template. eg: FindIt.set_cv_method('cv2.TM_CCOEFF_NORMED') """
         cls.CV_METHOD_NAME = method_name
         cls.CV_METHOD_CODE = eval(method_name)
+        logger.info('CV method: {}'.format(method_name))
+
+    @classmethod
+    def switch_logger(cls, status: bool):
+        """ enable or disable logger """
+        if status:
+            logger.enable(LOGGER_FLAG)
+            logger.info('logger up')
+        else:
+            logger.disable(LOGGER_FLAG)
 
     def load_template(self,
                       pic_path: str = None,
@@ -81,14 +95,17 @@ class FindIt(object):
         assert (pic_path is not None) or (pic_object_list is not None), 'need path or cv object'
 
         if pic_object_list is not None:
+            logger.info('load template from picture object directly ...')
             # pic_object: ('pic_name', cv_object)
             pic_name: str = pic_object_list[0]
             pic_object: np.ndarray = pic_object_list[1]
             self.template[pic_name] = load_grey_from_cv2_object(pic_object)
-            return
-
-        abs_path = os.path.abspath(pic_path)
-        self.template[abs_path] = load_grey_from_path(abs_path)
+        else:
+            logger.info('load template from picture path ...')
+            abs_path = os.path.abspath(pic_path)
+            pic_name = abs_path
+            self.template[abs_path] = load_grey_from_path(abs_path)
+        logger.info('load template [{}] successfully'.format(pic_name))
 
     def find(self,
              target_pic_path: str = None,
@@ -112,40 +129,51 @@ class FindIt(object):
         assert (target_pic_path is not None) or (target_pic_object is not None), 'need path or cv object'
 
         # load target
+        logger.info('start finding ...')
         target_pic_object = pre_pic(target_pic_path, target_pic_object)
 
         # mask
         if mask_pic_path or mask_pic_object is not None:
+            logger.info('mask detected')
             mask_pic_object = pre_pic(mask_pic_path, mask_pic_object)
+
+        # scale
+        if not scale:
+            # default scale
+            scale = (1, 3, 10)
+        logger.info('scale: {}'.format(str(scale)))
 
         result: typing.List[dict] = list()
         for each_template_path, each_template_object in self.template.items():
-            # default scale
-            if not scale:
-                scale = (1, 3, 10)
-
+            logger.debug('start analysing: [{}] ...'.format(each_template_path))
             min_val, max_val, min_loc, max_loc = self.compare(
                 target_pic_object,
                 each_template_object,
                 scale,
                 mask_pic_object
             )
+            logger.debug('raw compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
             min_loc, max_loc = map(lambda i: fix_location(each_template_object, i), [min_loc, max_loc])
+            logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
 
             # add to result list
-            result.append({
+            current_result = {
                 'path': each_template_path,
                 'min_val': min_val,
                 'max_val': max_val,
                 'min_loc': min_loc,
                 'max_loc': max_loc,
-            })
+            }
+            logger.debug('result for [{}]: {}'.format(each_template_path, json.dumps(current_result)))
+            result.append(current_result)
 
-        return {
+        final_result = {
             'target_path': target_pic_path,
             'cv_method': self.CV_METHOD_NAME,
             'data': result,
         }
+        logger.info('result: {}'.format(json.dumps(final_result)))
+        return final_result
 
     def compare(self,
                 target_pic_object: np.ndarray,
@@ -186,9 +214,11 @@ class FindIt(object):
                 mask=resize_mask_pic_object)
             result_list.append(cv2.minMaxLoc(res))
 
+        logger.debug('scale search result: {}'.format(result_list))
         # return the max one
         return sorted(result_list, key=lambda i: i[1])[-1]
 
     def reset(self):
         """ reset template, target and result """
         self.template = dict()
+        logger.info('findit reset successfully')

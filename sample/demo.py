@@ -7,6 +7,9 @@ import pprint
 # 你可以这么修改它：
 FindIt.set_cv_method('cv2.TM_CCORR_NORMED')
 
+# 可以打开日志用于调试程序（默认关闭）
+FindIt.switch_logger(True)
+
 # 初始化
 fi = FindIt()
 
