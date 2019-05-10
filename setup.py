@@ -6,7 +6,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='findit',
-    version='0.2.3',
+    version='0.3.0',
     description='find target icon on your picture, and get its position',
     author='williamfzc',
     author_email='fengzc@vip.qq.com',
