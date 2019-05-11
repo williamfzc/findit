@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 install_requirement_list = [
@@ -15,7 +15,7 @@ setup(
     author='williamfzc',
     author_email='fengzc@vip.qq.com',
     url='https://github.com/williamfzc/findit',
-    py_modules=['findit'],
+    packages=find_packages(),
     python_requires=">=3.6",
     install_requires=install_requirement_list
 )

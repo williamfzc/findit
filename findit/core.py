@@ -1,50 +1,11 @@
 import cv2
 import os
-import imutils
 import numpy as np
 import typing
 import json
-from loguru import logger
 
-# default: no log
-LOGGER_FLAG = 'findit'
-logger.disable(LOGGER_FLAG)
-
-
-def load_grey_from_path(pic_path: str) -> np.ndarray:
-    """ load grey picture (with cv2) from path """
-    raw_img = cv2.imread(pic_path)
-    return load_grey_from_cv2_object(raw_img)
-
-
-def load_grey_from_cv2_object(pic_object: np.ndarray) -> np.ndarray:
-    """ preparation for cv2 object (force turn it into gray) """
-    pic_object = pic_object.astype(np.uint8)
-    try:
-        # try to turn it into grey
-        grey_pic = cv2.cvtColor(pic_object, cv2.COLOR_BGR2GRAY)
-    except cv2.error:
-        # already grey
-        return pic_object
-    return grey_pic
-
-
-def pre_pic(pic_path: str = None, pic_object: np.ndarray = None) -> np.ndarray:
-    """ this method will turn pic path and pic object into grey pic object """
-    if pic_object is not None:
-        return load_grey_from_cv2_object(pic_object)
-    return load_grey_from_path(pic_path)
-
-
-def resize_pic_scale(pic_object: np.ndarray, target_scale: np.ndarray) -> np.ndarray:
-    return imutils.resize(pic_object, width=int(pic_object.shape[1] * target_scale))
-
-
-def fix_location(pic_object: np.ndarray, location: typing.Sequence):
-    """ location from cv2 should be left-top location, and need to fix it and make it central """
-    size_x, size_y = pic_object.shape
-    old_x, old_y = location
-    return old_x + size_x / 2, old_y + size_y / 2
+from findit.logger import logger, LOGGER_FLAG
+import findit.toolbox as toolbox
 
 
 class FindIt(object):
@@ -98,6 +59,7 @@ class FindIt(object):
         """
         load template picture
 
+        # todo use pic name as result's key
         :param pic_path: eg: '../your_picture.png'
         :param pic_object_list: eg: ('your_picture_name', your_pic_cv_object)
         :return:
@@ -109,12 +71,12 @@ class FindIt(object):
             # pic_object: ('pic_name', cv_object)
             pic_name: str = pic_object_list[0]
             pic_object: np.ndarray = pic_object_list[1]
-            self.template[pic_name] = load_grey_from_cv2_object(pic_object)
+            self.template[pic_name] = toolbox.load_grey_from_cv2_object(pic_object)
         else:
             logger.info('load template from picture path ...')
             abs_path = os.path.abspath(pic_path)
             pic_name = abs_path
-            self.template[abs_path] = load_grey_from_path(abs_path)
+            self.template[abs_path] = toolbox.load_grey_from_path(abs_path)
         logger.info('load template [{}] successfully'.format(pic_name))
 
     def find(self,
@@ -140,12 +102,12 @@ class FindIt(object):
 
         # load target
         logger.info('start finding ...')
-        target_pic_object = pre_pic(target_pic_path, target_pic_object)
+        target_pic_object = toolbox.pre_pic(target_pic_path, target_pic_object)
 
         # mask
         if mask_pic_path or mask_pic_object is not None:
             logger.info('mask detected')
-            mask_pic_object = pre_pic(mask_pic_path, mask_pic_object)
+            mask_pic_object = toolbox.pre_pic(mask_pic_path, mask_pic_object)
 
         # scale
         if not scale:
@@ -165,7 +127,7 @@ class FindIt(object):
                 mask_pic_object
             )
             logger.debug('raw compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
-            min_loc, max_loc = map(lambda i: fix_location(each_template_object, i), [min_loc, max_loc])
+            min_loc, max_loc = map(lambda i: toolbox.fix_location(each_template_object, i), [min_loc, max_loc])
             logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
 
             # feature matching
@@ -211,11 +173,11 @@ class FindIt(object):
 
         for each_scale in np.linspace(*scale):
             # resize template
-            resize_template_pic_object = resize_pic_scale(template_pic_object, each_scale)
+            resize_template_pic_object = toolbox.resize_pic_scale(template_pic_object, each_scale)
 
             # resize mask
             if mask_pic_object is not None:
-                resize_mask_pic_object = resize_pic_scale(mask_pic_object, each_scale)
+                resize_mask_pic_object = toolbox.resize_pic_scale(mask_pic_object, each_scale)
             else:
                 resize_mask_pic_object = None
 
