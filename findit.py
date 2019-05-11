@@ -6,7 +6,6 @@ import typing
 import json
 from loguru import logger
 
-
 # default: no log
 LOGGER_FLAG = 'findit'
 logger.disable(LOGGER_FLAG)
@@ -157,7 +156,9 @@ class FindIt(object):
         result: typing.List[dict] = list()
         for each_template_path, each_template_object in self.template.items():
             logger.debug('start analysing: [{}] ...'.format(each_template_path))
-            min_val, max_val, min_loc, max_loc = self._compare(
+
+            # template matching
+            min_val, max_val, min_loc, max_loc = self._compare_template(
                 target_pic_object,
                 each_template_object,
                 scale,
@@ -167,6 +168,9 @@ class FindIt(object):
             min_loc, max_loc = map(lambda i: fix_location(each_template_object, i), [min_loc, max_loc])
             logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
 
+            # feature matching
+            feature_center_point = self._compare_feature(target_pic_object, each_template_object)
+
             # add to result list
             current_result = {
                 'path': each_template_path,
@@ -174,6 +178,7 @@ class FindIt(object):
                 'max_val': max_val,
                 'min_loc': min_loc,
                 'max_loc': max_loc,
+                'feature_loc': feature_center_point,
             }
             logger.debug('result for [{}]: {}'.format(each_template_path, json.dumps(current_result)))
             result.append(current_result)
@@ -186,13 +191,13 @@ class FindIt(object):
         logger.info('result: {}'.format(json.dumps(final_result)))
         return final_result
 
-    def _compare(self,
-                 target_pic_object: np.ndarray,
-                 template_pic_object: np.ndarray,
-                 scale: typing.Sequence,
-                 mask_pic_object: np.ndarray = None) -> typing.Sequence[float]:
+    def _compare_template(self,
+                          target_pic_object: np.ndarray,
+                          template_pic_object: np.ndarray,
+                          scale: typing.Sequence,
+                          mask_pic_object: np.ndarray = None) -> typing.Sequence[float]:
         """
-        match template between picture and template
+        compare via template matching
         (https://www.pyimagesearch.com/2015/01/26/multi-scale-template-matching-using-python-opencv/)
 
         :param target_pic_object:
@@ -228,6 +233,42 @@ class FindIt(object):
         logger.debug('scale search result: {}'.format(result_list))
         # return the max one
         return sorted(result_list, key=lambda i: i[1])[-1]
+
+    def _compare_feature(self,
+                         target_pic_object: np.ndarray,
+                         template_pic_object: np.ndarray) -> typing.Sequence[float]:
+        """
+        compare via feature matching
+
+        :param target_pic_object:
+        :param template_pic_object:
+        :return:
+        """
+        # Initiate SIFT detector
+        sift = cv2.xfeatures2d.SIFT_create()
+
+        # find the keypoints and descriptors with SIFT
+        _, des1 = sift.detectAndCompute(template_pic_object, None)
+        kp2, des2 = sift.detectAndCompute(target_pic_object, None)
+
+        # BFMatcher with default params
+        bf = cv2.BFMatcher()
+        matches = bf.knnMatch(des1, des2, k=2)
+
+        # Apply ratio test
+        good = []
+        for m, n in matches:
+            if m.distance < 0.75 * n.distance:
+                good.append([m])
+        point_list = list()
+        for each in good:
+            img2_idx = each[0].trainIdx
+            point_list.append(kp2[img2_idx].pt)
+
+        # cal the central point
+        center_x = sum([_[0] for _ in point_list]) / len(point_list)
+        center_y = sum([_[1] for _ in point_list]) / len(point_list)
+        return center_x, center_y
 
     def reset(self):
         """ reset template, target and result """
