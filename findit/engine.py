@@ -12,6 +12,13 @@ class FindItEngine(object):
 
 
 class TemplateEngine(FindItEngine):
+    """
+    Default cv method is TM_CCORR_NORMED
+
+    1. Opencv support only CV_TM_CCORR_NORMED & CV_TM_SQDIFF
+        (https://stackoverflow.com/questions/35658323/python-opencv-matchtemplate-is-mask-feature-implemented)
+    2. Personally I do not want to use SQDIFF series. Its max value is totally different from what we thought.
+    """
     DEFAULT_CV_METHOD_NAME = 'cv2.TM_CCORR_NORMED'
 
     def __init__(self,
@@ -53,11 +60,16 @@ class TemplateEngine(FindItEngine):
         min_loc, max_loc = map(lambda i: toolbox.fix_location(template_object, i), [min_loc, max_loc])
         logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
 
+        # 'target_point' must existed
         return {
-            'min_val': min_val,
-            'max_val': max_val,
-            'min_loc': min_loc,
-            'max_loc': max_loc,
+            'target_point': max_loc,
+            'target_sim': max_val,
+            'raw': {
+                'min_val': min_val,
+                'max_val': max_val,
+                'min_loc': min_loc,
+                'max_loc': max_loc,
+            }
         }
 
     def _compare_template(self,
@@ -105,6 +117,14 @@ class TemplateEngine(FindItEngine):
 
 
 class FeatureEngine(FindItEngine):
+    class Point(object):
+        def __init__(self, x: float, y: float):
+            self.x = x
+            self.y = y
+
+        def to_tuple(self) -> tuple:
+            return self.x, self.y
+
     def __init__(self, *args, **kwargs):
         # TODO
         pass
@@ -113,14 +133,26 @@ class FeatureEngine(FindItEngine):
                 template_object: np.ndarray,
                 target_object: np.ndarray,
                 *_, **__) -> dict:
-        center_point = self._compare_feature(template_object, target_object)
+        point_list = self._get_feature_point_list(template_object, target_object)
+        center_point = self._calculate_center_point(point_list)
+
+        readable_point_list = [each.to_tuple() for each in point_list]
+        readable_center_point = center_point.to_tuple()
         return {
-            'center': center_point,
+            'target_point': readable_center_point,
+            'raw': readable_point_list,
         }
 
-    def _compare_feature(self,
-                         template_pic_object: np.ndarray,
-                         target_pic_object: np.ndarray) -> typing.Sequence[float]:
+    @classmethod
+    def _calculate_center_point(cls, point_list: typing.Sequence[Point]) -> Point:
+        center_x, center_y = map(lambda axle: sum([getattr(each, axle) for each in point_list]) / len(point_list),
+                                 ('x', 'y'))
+        return cls.Point(center_x, center_y)
+
+    @classmethod
+    def _get_feature_point_list(cls,
+                                template_pic_object: np.ndarray,
+                                target_pic_object: np.ndarray) -> typing.Sequence[Point]:
         """
         compare via feature matching
 
@@ -147,9 +179,7 @@ class FeatureEngine(FindItEngine):
         point_list = list()
         for each in good:
             img2_idx = each[0].trainIdx
-            point_list.append(kp2[img2_idx].pt)
+            each_point = cls.Point(*kp2[img2_idx].pt)
+            point_list.append(each_point)
 
-        # cal the central point
-        center_x = sum([_[0] for _ in point_list]) / len(point_list)
-        center_y = sum([_[1] for _ in point_list]) / len(point_list)
-        return center_x, center_y
+        return point_list

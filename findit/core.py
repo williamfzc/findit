@@ -12,15 +12,6 @@ from findit.engine import TemplateEngine, FeatureEngine
 class FindIt(object):
     """ FindIt Operator """
 
-    """
-    Default cv method is TM_CCORR_NORMED
-    
-    1. Opencv support only CV_TM_CCORR_NORMED & CV_TM_SQDIFF
-        (https://stackoverflow.com/questions/35658323/python-opencv-matchtemplate-is-mask-feature-implemented)
-    2. Personally I do not want to use SQDIFF series. Its max value is totally different from what we thought.
-    """
-    DEFAULT_CV_METHOD_NAME = 'cv2.TM_CCORR_NORMED'
-
     def __init__(self,
                  need_log: bool = None):
         # template pic dict,
@@ -67,6 +58,7 @@ class FindIt(object):
              target_pic_path: str = None,
              target_pic_object: np.ndarray = None,
              *args, **kwargs):
+        # TODO simple mode and complex mode, for different kind of output
         """
         start match
 
@@ -84,6 +76,7 @@ class FindIt(object):
         logger.info('start finding ...')
         target_pic_object = toolbox.pre_pic(target_pic_path, target_pic_object)
 
+        # TODO engine life-time management
         # engine init
         template_engine = TemplateEngine(*args, **kwargs)
         feature_engine = FeatureEngine(*args, **kwargs)
@@ -114,5 +107,6 @@ class FindIt(object):
 
     def reset(self):
         """ reset template, target and result """
+        # TODO maybe name it 'clear' is better?
         self.template = dict()
         logger.info('findit reset successfully')
