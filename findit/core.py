@@ -1,3 +1,4 @@
+import cv2
 import os
 import numpy as np
 import typing
@@ -21,7 +22,6 @@ class FindIt(object):
     DEFAULT_CV_METHOD_NAME = 'cv2.TM_CCORR_NORMED'
 
     def __init__(self,
-                 cv_method_name: str = None,
                  need_log: bool = None):
         # template pic dict,
         # { pic_name: pic_cv_object }
@@ -29,20 +29,6 @@ class FindIt(object):
 
         # init logger
         self.switch_logger(bool(need_log))
-
-        # set cv method
-        self._cv_method_name: str = None
-        self._cv_method_code: int = None
-
-        if cv_method_name is None:
-            cv_method_name = self.DEFAULT_CV_METHOD_NAME
-        self.set_cv_method(cv_method_name)
-
-    def set_cv_method(self, method_name: str):
-        """ change cv method, for match template. eg: FindIt.set_cv_method('cv2.TM_CCOEFF_NORMED') """
-        self._cv_method_name = method_name
-        self._cv_method_code = eval(method_name)
-        logger.info('CV method: {}'.format(method_name))
 
     @staticmethod
     def switch_logger(status: bool):
@@ -54,38 +40,37 @@ class FindIt(object):
             logger.disable(LOGGER_FLAG)
 
     def load_template(self,
+                      pic_name: str,
                       pic_path: str = None,
-                      pic_object_list: typing.Sequence = None):
+                      pic_object: np.ndarray = None):
         """
         load template picture
 
-        # todo use pic name as result's key
+        :param pic_name: use pic name as result's key, eg: 'your_picture_1'
         :param pic_path: eg: '../your_picture.png'
-        :param pic_object_list: eg: ('your_picture_name', your_pic_cv_object)
+        :param pic_object: eg: your_pic_cv_object)
         :return:
         """
-        assert (pic_path is not None) or (pic_object_list is not None), 'need path or cv object'
+        assert (pic_path is not None) or (pic_object is not None), 'need path or cv object'
 
-        if pic_object_list is not None:
+        if pic_object is not None:
             logger.info('load template from picture object directly ...')
-            # pic_object: ('pic_name', cv_object)
-            pic_name: str = pic_object_list[0]
-            pic_object: np.ndarray = pic_object_list[1]
             self.template[pic_name] = toolbox.load_grey_from_cv2_object(pic_object)
         else:
             logger.info('load template from picture path ...')
             abs_path = os.path.abspath(pic_path)
-            pic_name = abs_path
-            self.template[abs_path] = toolbox.load_grey_from_path(abs_path)
+            self.template[pic_name] = toolbox.load_grey_from_path(abs_path)
         logger.info('load template [{}] successfully'.format(pic_name))
 
     def find(self,
+             target_pic_name: str,
              target_pic_path: str = None,
              target_pic_object: np.ndarray = None,
              *args, **kwargs):
         """
         start match
 
+        :param target_pic_name: eg: 'your_target_picture_1'
         :param target_pic_path: '/path/to/your/target.png'
         :param target_pic_object: your_pic_cv_object (loaded by cv2)
         :return:
@@ -103,25 +88,25 @@ class FindIt(object):
         template_engine = TemplateEngine(*args, **kwargs)
         feature_engine = FeatureEngine(*args, **kwargs)
 
-        result: typing.List[dict] = list()
-        for each_template_path, each_template_object in self.template.items():
-            logger.debug('start analysing: [{}] ...'.format(each_template_path))
+        result = dict()
+        for each_template_name, each_template_object in self.template.items():
+            logger.debug('start analysing: [{}] ...'.format(each_template_name))
 
             template_match_result = template_engine.execute(each_template_object, target_pic_object, *args, **kwargs)
-            feature_match_result = feature_engine.execute(target_pic_object, each_template_object)
+            feature_match_result = feature_engine.execute(each_template_object, target_pic_object)
 
             # add to result list
             current_result = {
-                'path': each_template_path,
+                'name': each_template_name,
                 'template': template_match_result,
                 'feature': feature_match_result,
             }
-            logger.debug('result for [{}]: {}'.format(each_template_path, json.dumps(current_result)))
-            result.append(current_result)
+            logger.debug('result for [{}]: {}'.format(each_template_name, json.dumps(current_result)))
+            result[each_template_name] = current_result
 
         final_result = {
+            'target_name': target_pic_name,
             'target_path': target_pic_path,
-            'cv_method': self._cv_method_name,
             'data': result,
         }
         logger.info('result: {}'.format(json.dumps(final_result)))

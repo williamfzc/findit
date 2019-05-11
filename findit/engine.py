@@ -44,8 +44,8 @@ class TemplateEngine(FindItEngine):
 
         # template matching
         min_val, max_val, min_loc, max_loc = self._compare_template(
-            target_object,
             template_object,
+            target_object,
             self.scale,
             mask_pic_object
         )
@@ -61,16 +61,16 @@ class TemplateEngine(FindItEngine):
         }
 
     def _compare_template(self,
-                          target_pic_object: np.ndarray,
                           template_pic_object: np.ndarray,
+                          target_pic_object: np.ndarray,
                           scale: typing.Sequence,
                           mask_pic_object: np.ndarray = None) -> typing.Sequence[float]:
         """
         compare via template matching
         (https://www.pyimagesearch.com/2015/01/26/multi-scale-template-matching-using-python-opencv/)
 
-        :param target_pic_object:
         :param template_pic_object:
+        :param target_pic_object:
         :param scale: default to (1, 3, 10)
         :param mask_pic_object:
         :return: min_val, max_val, min_loc, max_loc
@@ -124,8 +124,8 @@ class FeatureEngine(FindItEngine):
         """
         compare via feature matching
 
-        :param target_pic_object:
         :param template_pic_object:
+        :param target_pic_object:
         :return:
         """
         # Initiate SIFT detector
