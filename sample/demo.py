@@ -63,5 +63,19 @@ pprint.pprint(result)
 #  'target_path': 'wechat_screen.png'}
 
 
-# take this as a test case in travis :)
-# TODO test case
+# take this as a test case in travis (just a very simple check)
+
+assert 'data' in result
+assert 'target_name' in result
+assert 'target_path' in result
+
+data = result['data']
+assert 'logo_from_object' in data
+assert 'logo_from_path' in data
+
+logo_from_object_result = data['logo_from_object']
+logo_from_path_result = data['logo_from_path']
+assert 'FeatureEngine' in logo_from_object_result
+assert 'FeatureEngine' in logo_from_path_result
+assert 'TemplateEngine' in logo_from_object_result
+assert 'TemplateEngine' in logo_from_path_result
