@@ -34,10 +34,12 @@ class FindIt(object):
         if not engine:
             # default
             engine = ['template', 'feature']
-        self.engine_list = [engine_dict[each](*args, **kwargs) for each in engine]
+        self.engine_list = None
+        self.set_engine(engine, *args, **kwargs)
 
         # pro mode
         self.pro_mode = bool(pro_mode)
+        logger.info('in pro mode: {}'.format(self.pro_mode))
 
     @staticmethod
     def switch_logger(status: bool):
@@ -47,6 +49,10 @@ class FindIt(object):
             logger.info('logger up')
         else:
             logger.disable(LOGGER_FLAG)
+
+    def set_engine(self, engine_name_list, *args, **kwargs):
+        logger.info('set engine: {}'.format(engine_name_list))
+        self.engine_list = [engine_dict[each](*args, **kwargs) for each in engine_name_list]
 
     def load_template(self,
                       pic_name: str,
@@ -117,8 +123,7 @@ class FindIt(object):
         logger.info('result: {}'.format(json.dumps(final_result)))
         return final_result
 
-    def reset(self):
+    def clear(self):
         """ reset template, target and result """
-        # TODO maybe name it 'clear' is better?
         self.template = dict()
-        logger.info('findit reset successfully')
+        logger.info('findit clear successfully')

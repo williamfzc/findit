@@ -1,13 +1,15 @@
 from findit import FindIt
 import cv2
 import pprint
+import time
 
 
 # 初始化
-fi = FindIt(need_log=False)
-
-# 可以打开日志用于调试程序（默认关闭）
-fi.switch_logger(False)
+fi = FindIt(
+    need_log=False,
+    engine=['template', 'feature'],
+    pro_mode=False,
+)
 
 # 加载模板
 # 1. 通过图片路径加载图片
@@ -40,23 +42,20 @@ result = fi.find(
     # mask_pic_object=some_object,
 )
 
-# 在分析后，你可以通过reset重置所有模板。当然你也可以选择保留以进行其他分析。
-fi.reset()
+# 在分析后，你可以通过 clear 重置所有模板。当然你也可以选择保留以进行其他分析。
+fi.clear()
 
 # sample result
+time.sleep(1)
 pprint.pprint(result)
-# {'config': {'cv_method': 5},
-#  'data': [{'max_loc': (475.0, 344.0),
-#            'max_val': 0.984991729259491,
-#            'min_loc': (448.0, 392.0),
-#            'min_val': -0.6493372321128845,
-#            'path': 'F:\\findit\\sample\\wechat_logo.png'},
-#           {'max_loc': (475.0, 344.0),
-#            'max_val': 0.984991729259491,
-#            'min_loc': (448.0, 392.0),
-#            'min_val': -0.6493372321128845,
-#            'path': 'wechat_logo1'}],
-#  'target_path': './wechat_screen.png'}
+# {'data': {'logo_from_object': {'FeatureEngine': (514.9602695041233,
+#                                                  378.0506880018446),
+#                                'TemplateEngine': (475.0, 344.0)},
+#           'logo_from_path': {'FeatureEngine': (514.9602695041233,
+#                                                378.0506880018446),
+#                              'TemplateEngine': (475.0, 344.0)}},
+#  'target_name': 'screen',
+#  'target_path': 'wechat_screen.png'}
 
 
 # take this as a test case in travis :)

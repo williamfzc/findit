@@ -37,7 +37,9 @@ class TemplateEngine(FindItEngine):
             # default scale
             scale = (1, 3, 10)
         self.scale = scale
-        logger.debug('scale: {}'.format(str(scale)))
+
+        logger.debug('cv method: {}'.format(self.cv_method_name))
+        logger.debug('scale: {}'.format(scale))
         logger.info('engine {} loaded'.format(self.get_type()))
 
     def execute(self,
