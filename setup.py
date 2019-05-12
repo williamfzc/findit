@@ -6,6 +6,7 @@ install_requirement_list = [
     'imutils',
     'numpy',
     'loguru',
+    'opencv-contrib-python==3.4.1.15'
 ]
 
 setup(
