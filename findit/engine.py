@@ -4,11 +4,12 @@ import cv2
 
 from findit.logger import logger
 from findit import toolbox
+from findit.toolbox import Point
 
 
 class FindItEngine(object):
     def get_type(self):
-        return self.__name__
+        return self.__class__.__name__
 
 
 class TemplateEngine(FindItEngine):
@@ -36,7 +37,8 @@ class TemplateEngine(FindItEngine):
             # default scale
             scale = (1, 3, 10)
         self.scale = scale
-        logger.info('scale: {}'.format(str(scale)))
+        logger.debug('scale: {}'.format(str(scale)))
+        logger.info('engine {} loaded'.format(self.get_type()))
 
     def execute(self,
                 template_object: np.ndarray,
@@ -117,24 +119,16 @@ class TemplateEngine(FindItEngine):
 
 
 class FeatureEngine(FindItEngine):
-    class Point(object):
-        def __init__(self, x: float, y: float):
-            self.x = x
-            self.y = y
-
-        def to_tuple(self) -> tuple:
-            return self.x, self.y
-
-    def __init__(self, *args, **kwargs):
-        # TODO
-        pass
+    def __init__(self,
+                 *_, **__):
+        logger.info('engine {} loaded'.format(self.get_type()))
 
     def execute(self,
                 template_object: np.ndarray,
                 target_object: np.ndarray,
                 *_, **__) -> dict:
         point_list = self._get_feature_point_list(template_object, target_object)
-        center_point = self._calculate_center_point(point_list)
+        center_point = toolbox.calculate_center_point(point_list)
 
         readable_point_list = [each.to_tuple() for each in point_list]
         readable_center_point = center_point.to_tuple()
@@ -142,12 +136,6 @@ class FeatureEngine(FindItEngine):
             'target_point': readable_center_point,
             'raw': readable_point_list,
         }
-
-    @classmethod
-    def _calculate_center_point(cls, point_list: typing.Sequence[Point]) -> Point:
-        center_x, center_y = map(lambda axle: sum([getattr(each, axle) for each in point_list]) / len(point_list),
-                                 ('x', 'y'))
-        return cls.Point(center_x, center_y)
 
     @classmethod
     def _get_feature_point_list(cls,
@@ -179,7 +167,13 @@ class FeatureEngine(FindItEngine):
         point_list = list()
         for each in good:
             img2_idx = each[0].trainIdx
-            each_point = cls.Point(*kp2[img2_idx].pt)
+            each_point = Point(*kp2[img2_idx].pt)
             point_list.append(each_point)
 
         return point_list
+
+
+engine_dict = {
+    'feature': FeatureEngine,
+    'template': TemplateEngine,
+}

@@ -4,6 +4,15 @@ import imutils
 import typing
 
 
+class Point(object):
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
+
+    def to_tuple(self) -> tuple:
+        return self.x, self.y
+
+
 def load_grey_from_path(pic_path: str) -> np.ndarray:
     """ load grey picture (with cv2) from path """
     raw_img = cv2.imread(pic_path)
@@ -38,3 +47,11 @@ def fix_location(pic_object: np.ndarray, location: typing.Sequence):
     size_x, size_y = pic_object.shape
     old_x, old_y = location
     return old_x + size_x / 2, old_y + size_y / 2
+
+
+def calculate_center_point(point_list: typing.Sequence[Point]) -> Point:
+    # TODO need better design
+    center_x, center_y = map(lambda axle: sum([getattr(each, axle) for each in point_list]) / len(point_list),
+                             ('x', 'y'))
+    return Point(center_x, center_y)
+

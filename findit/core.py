@@ -6,20 +6,38 @@ import json
 
 from findit.logger import logger, LOGGER_FLAG
 from findit import toolbox
-from findit.engine import TemplateEngine, FeatureEngine
+from findit.engine import engine_dict
 
 
 class FindIt(object):
     """ FindIt Operator """
 
     def __init__(self,
-                 need_log: bool = None):
+                 need_log: bool = None,
+                 engine: typing.Sequence = None,
+                 pro_mode: bool = None,
+                 *args, **kwargs):
+        """
+
+        :param need_log: enable or disable logger
+        :param engine: choose image processing engine, eg: ['feature', 'template']
+        :param pro_mode:
+        """
         # template pic dict,
         # { pic_name: pic_cv_object }
         self.template: typing.Dict[str, np.ndarray] = dict()
 
         # init logger
         self.switch_logger(bool(need_log))
+
+        # init engine
+        if not engine:
+            # default
+            engine = ['template', 'feature']
+        self.engine_list = [engine_dict[each](*args, **kwargs) for each in engine]
+
+        # pro mode
+        self.pro_mode = bool(pro_mode)
 
     @staticmethod
     def switch_logger(status: bool):
@@ -58,7 +76,6 @@ class FindIt(object):
              target_pic_path: str = None,
              target_pic_object: np.ndarray = None,
              *args, **kwargs):
-        # TODO simple mode and complex mode, for different kind of output
         """
         start match
 
@@ -76,24 +93,19 @@ class FindIt(object):
         logger.info('start finding ...')
         target_pic_object = toolbox.pre_pic(target_pic_path, target_pic_object)
 
-        # TODO engine life-time management
-        # engine init
-        template_engine = TemplateEngine(*args, **kwargs)
-        feature_engine = FeatureEngine(*args, **kwargs)
-
         result = dict()
         for each_template_name, each_template_object in self.template.items():
             logger.debug('start analysing: [{}] ...'.format(each_template_name))
 
-            template_match_result = template_engine.execute(each_template_object, target_pic_object, *args, **kwargs)
-            feature_match_result = feature_engine.execute(each_template_object, target_pic_object)
+            current_result = dict()
+            for each_engine in self.engine_list:
+                each_result = each_engine.execute(each_template_object, target_pic_object, *args, **kwargs)
 
-            # add to result list
-            current_result = {
-                'name': each_template_name,
-                'template': template_match_result,
-                'feature': feature_match_result,
-            }
+                # if not in pro mode,
+                if not self.pro_mode:
+                    each_result = each_result['target_point']
+                current_result[each_engine.get_type()] = each_result
+
             logger.debug('result for [{}]: {}'.format(each_template_name, json.dumps(current_result)))
             result[each_template_name] = current_result
 
