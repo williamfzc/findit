@@ -21,20 +21,22 @@
 那么，通过这个工具，你可以得到：
 
 ```text
-{'cv_method': 'cv2.TM_CCORR_NORMED',
- 'data': [{'max_loc': (475.0, 344.0),
-           'max_val': 0.9987547993659973,
-           'min_loc': (39.0, 30.0),
-           'min_val': 0.8024401664733887,
-           'path': 'wechat_logo1'}],
+{'data': {'logo': {'FeatureEngine': (514.9602695041233, 378.0506880018446),
+                   'TemplateEngine': (475.0, 344.0)},
+ 'target_name': 'screen',
  'target_path': 'wechat_screen.png'}
 ```
 
-通过上述数据可以知道，微信图标出现在`(475.0, 344.0)`的概率超过了0.99。
+通过上述数据可以知道，微信图标最可能出现的点位：
+
+- Feature Matching 的计算结果是 `(514, 378)`
+- Template Matching 的计算结果是 `(475, 344)`
+
+可以根据实际需要取舍。
 
 ## 使用
 
-可以浏览[demo.py](sample/demo.py)。
+更多丰富用法请参考 [demo.py](sample/demo.py)。
 
 ## LICENSE
 

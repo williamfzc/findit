@@ -3,12 +3,25 @@ import cv2
 import pprint
 import time
 
-
 # 初始化
 fi = FindIt(
+    # 是否需要log，默认否
     need_log=False,
+    # 支持 模板匹配 与 特征识别，默认都使用
     engine=['template', 'feature'],
+    # pro模式会带有更为丰富的结果数据，默认不打开
     pro_mode=False,
+
+    # 模板匹配相关
+    # 为了更好的检测率，findit专门设计了scale参数
+    # 该参数会在一定范围内缩放模板图片，并进行逐一匹配
+    # 默认为 (1, 3, 10) ，意思是：
+    # 步长 = (3 - 1) / 10 = 0.2
+    # 那么，模板图片会依次进行 (1.0, 1.2, 1.4, 1.6, ... 2.6, 2.8, 3.0) 倍的放缩逐一比较，以达到最佳的适配效果
+    scale=(1, 3, 10),
+    # 默认的模板匹配算法为 TM_CCORR_NORMED
+    # 你也可以在此处修改为你偏好的
+    cv_method_name='cv2.TM_CCORR_NORMED',
 )
 
 # 加载模板
@@ -28,17 +41,9 @@ result = fi.find(
     # 当然，也可以是cv2对象
     # target_pic_object=some_object,
 
-    # 为了更好的检测率，findit专门设计了scale参数
-    # 该参数会在一定范围内缩放模板图片，并进行逐一匹配
-    # (1, 3, 10) 意思是：
-    # 步长 = (3 - 1) / 10 = 0.2
-    # 那么，模板图片会依次进行 (1.0, 1.2, 1.4, 1.6, ... 2.6, 2.8, 3.0) 倍的放缩逐一比较，以达到最佳的适配效果
-    scale=(1, 3, 10),
-
-    # optional:
     # 支持了蒙版图片的检测 （https://github.com/williamfzc/findit/issues/1）
     # 同样的，你可以传入图片路径或对象
-    # mask_pic_path='mask.png',
+    # mask_pic_path='wechat_logo.png',
     # mask_pic_object=some_object,
 )
 

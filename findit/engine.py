@@ -21,6 +21,7 @@ class TemplateEngine(FindItEngine):
     2. Personally I do not want to use SQDIFF series. Its max value is totally different from what we thought.
     """
     DEFAULT_CV_METHOD_NAME = 'cv2.TM_CCORR_NORMED'
+    DEFAULT_SCALE = (1, 3, 10)
 
     def __init__(self,
                  cv_method_name: str = None,
@@ -35,7 +36,7 @@ class TemplateEngine(FindItEngine):
         # scale
         if not scale:
             # default scale
-            scale = (1, 3, 10)
+            scale = self.DEFAULT_SCALE
         self.scale = scale
 
         logger.debug('cv method: {}'.format(self.cv_method_name))
