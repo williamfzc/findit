@@ -26,12 +26,12 @@ fi = FindIt(
 
 # 加载模板
 # 1. 通过图片路径加载图片
-fi.load_template('logo_from_path', pic_path='wechat_logo.png')
+fi.load_template('wechat_logo', pic_path='wechat_logo.png')
 
 # 2. 或者直接加载通过cv2加载进来的图片
-pic_object = cv2.imread('wechat_logo.png')
+pic_object = cv2.imread('app_store_logo.png')
 # 传入的时候注意，传入的是一个列表，形式为 （名称，图片对象）
-fi.load_template('logo_from_object', pic_object=pic_object)
+fi.load_template('app_store_logo', pic_object=pic_object)
 
 # 在加载模板后即可开始分析
 result = fi.find(
@@ -53,12 +53,12 @@ fi.clear()
 # sample result
 time.sleep(1)
 pprint.pprint(result)
-# {'data': {'logo_from_object': {'FeatureEngine': (514.9602695041233,
-#                                                  378.0506880018446),
-#                                'TemplateEngine': (475.0, 344.0)},
-#           'logo_from_path': {'FeatureEngine': (514.9602695041233,
-#                                                378.0506880018446),
-#                              'TemplateEngine': (475.0, 344.0)}},
+# {'data': {'app_store_logo': {'FeatureEngine': (94.66734313964844,
+#                                                380.8362731933594),
+#                              'TemplateEngine': (56.0, 340.0)},
+#           'wechat_logo': {'FeatureEngine': (528.9216674804687,
+#                                             383.21449890136716),
+#                           'TemplateEngine': (475.0, 344.0)}},
 #  'target_name': 'screen',
 #  'target_path': 'wechat_screen.png'}
 
@@ -70,12 +70,9 @@ assert 'target_name' in result
 assert 'target_path' in result
 
 data = result['data']
-assert 'logo_from_object' in data
-assert 'logo_from_path' in data
-
-logo_from_object_result = data['logo_from_object']
-logo_from_path_result = data['logo_from_path']
-assert 'FeatureEngine' in logo_from_object_result
-assert 'FeatureEngine' in logo_from_path_result
-assert 'TemplateEngine' in logo_from_object_result
-assert 'TemplateEngine' in logo_from_path_result
+app_store_logo_result = data['app_store_logo']
+wechat_logo_result = data['wechat_logo']
+assert 'FeatureEngine' in app_store_logo_result
+assert 'FeatureEngine' in wechat_logo_result
+assert 'TemplateEngine' in app_store_logo_result
+assert 'TemplateEngine' in wechat_logo_result
