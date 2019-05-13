@@ -165,6 +165,7 @@ class FeatureEngine(FindItEngine):
         # Apply ratio test
         good = []
         for m, n in matches:
+            # todo why 0.75?
             if m.distance < 0.75 * n.distance:
                 good.append([m])
         point_list = list()
