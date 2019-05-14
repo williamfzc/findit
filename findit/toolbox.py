@@ -1,12 +1,7 @@
-import collections
 import cv2
 import numpy as np
 import imutils
 import typing
-# https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
-from sklearn.cluster import KMeans
-
-DEFAULT_CLUSTER_NUM = 3
 
 
 class Point(object):
@@ -52,15 +47,3 @@ def fix_location(pic_object: np.ndarray, location: typing.Sequence):
     size_x, size_y = pic_object.shape
     old_x, old_y = location
     return old_x + size_x / 2, old_y + size_y / 2
-
-
-def calculate_center_point(point_list: typing.Sequence[Point]) -> Point:
-    np_point_list = np.array([_.to_tuple() for _ in point_list])
-    point_num = len(np_point_list)
-    if point_num < DEFAULT_CLUSTER_NUM:
-        cluster_num = point_num
-    else:
-        cluster_num = DEFAULT_CLUSTER_NUM
-    kmeans = KMeans(n_clusters=cluster_num).fit(np_point_list)
-    mode_label_index = sorted(collections.Counter(kmeans.labels_).items(), key=lambda x: x[1])[-1][0]
-    return Point(*kmeans.cluster_centers_[mode_label_index])

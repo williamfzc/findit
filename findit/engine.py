@@ -1,6 +1,9 @@
 import numpy as np
 import typing
 import cv2
+import collections
+# https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
+from sklearn.cluster import KMeans
 
 from findit.logger import logger
 from findit import toolbox
@@ -24,23 +27,25 @@ class TemplateEngine(FindItEngine):
     DEFAULT_SCALE = (1, 3, 10)
 
     def __init__(self,
-                 cv_method_name: str = None,
-                 scale: typing.Sequence = None,
+                 engine_template_cv_method_name: str = None,
+                 engine_template_scale: typing.Sequence = None,
                  *_, **__):
+        logger.info('engine {} preparing ...'.format(self.get_type()))
+
         # cv
-        if not cv_method_name:
-            cv_method_name = self.DEFAULT_CV_METHOD_NAME
-        self.cv_method_name = cv_method_name
-        self.cv_method_code = eval(cv_method_name)
+        if not engine_template_cv_method_name:
+            engine_template_cv_method_name = self.DEFAULT_CV_METHOD_NAME
+        self.cv_method_name = engine_template_cv_method_name
+        self.cv_method_code = eval(engine_template_cv_method_name)
 
         # scale
-        if not scale:
+        if not engine_template_scale:
             # default scale
-            scale = self.DEFAULT_SCALE
-        self.scale = scale
+            engine_template_scale = self.DEFAULT_SCALE
+        self.scale = engine_template_scale
 
         logger.debug('cv method: {}'.format(self.cv_method_name))
-        logger.debug('scale: {}'.format(scale))
+        logger.debug('scale: {}'.format(engine_template_scale))
         logger.info('engine {} loaded'.format(self.get_type()))
 
     def execute(self,
@@ -122,16 +127,30 @@ class TemplateEngine(FindItEngine):
 
 
 class FeatureEngine(FindItEngine):
+    DEFAULT_CLUSTER_NUM = 3
+    DEFAULT_DISTANCE_THRESHOLD = 0.75
+
     def __init__(self,
+                 engine_feature_cluster_num: int = None,
+                 engine_feature_distance_threshold: float = None,
                  *_, **__):
+        logger.info('engine {} preparing ...'.format(self.get_type()))
+
+        # for kmeans calculation
+        self.cluster_num = engine_feature_cluster_num or self.DEFAULT_CLUSTER_NUM
+        # for feature matching
+        self.distance_threshold = engine_feature_distance_threshold or self.DEFAULT_DISTANCE_THRESHOLD
+
+        logger.debug('cluster num: {}'.format(self.cluster_num))
+        logger.debug('distance threshold: {}'.format(self.distance_threshold))
         logger.info('engine {} loaded'.format(self.get_type()))
 
     def execute(self,
                 template_object: np.ndarray,
                 target_object: np.ndarray,
                 *_, **__) -> dict:
-        point_list = self._get_feature_point_list(template_object, target_object)
-        center_point = toolbox.calculate_center_point(point_list)
+        point_list = self.get_feature_point_list(template_object, target_object)
+        center_point = self.calculate_center_point(point_list)
 
         readable_point_list = [each.to_tuple() for each in point_list]
         readable_center_point = center_point.to_tuple()
@@ -140,10 +159,9 @@ class FeatureEngine(FindItEngine):
             'raw': readable_point_list,
         }
 
-    @classmethod
-    def _get_feature_point_list(cls,
-                                template_pic_object: np.ndarray,
-                                target_pic_object: np.ndarray) -> typing.Sequence[Point]:
+    def get_feature_point_list(self,
+                               template_pic_object: np.ndarray,
+                               target_pic_object: np.ndarray) -> typing.Sequence[Point]:
         """
         compare via feature matching
 
@@ -165,8 +183,7 @@ class FeatureEngine(FindItEngine):
         # Apply ratio test
         good = []
         for m, n in matches:
-            # todo why 0.75?
-            if m.distance < 0.75 * n.distance:
+            if m.distance < self.distance_threshold * n.distance:
                 good.append([m])
         point_list = list()
         for each in good:
@@ -175,6 +192,20 @@ class FeatureEngine(FindItEngine):
             point_list.append(each_point)
 
         return point_list
+
+    def calculate_center_point(self, point_list: typing.Sequence[Point]) -> Point:
+        np_point_list = np.array([_.to_tuple() for _ in point_list])
+        point_num = len(np_point_list)
+
+        # if match points' count is less than clusters
+        if point_num < self.cluster_num:
+            cluster_num = 1
+        else:
+            cluster_num = self.cluster_num
+
+        k_means = KMeans(n_clusters=cluster_num).fit(np_point_list)
+        mode_label_index = sorted(collections.Counter(k_means.labels_).items(), key=lambda x: x[1])[-1][0]
+        return Point(*k_means.cluster_centers_[mode_label_index])
 
 
 engine_dict = {
