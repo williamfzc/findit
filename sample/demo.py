@@ -12,16 +12,23 @@ fi = FindIt(
     # pro模式会带有更为丰富的结果数据，默认不打开
     pro_mode=False,
 
+    # 引擎相关参数均为engine开头
     # 模板匹配相关
     # 为了更好的检测率，findit专门设计了scale参数
     # 该参数会在一定范围内缩放模板图片，并进行逐一匹配
     # 默认为 (1, 3, 10) ，意思是：
     # 步长 = (3 - 1) / 10 = 0.2
     # 那么，模板图片会依次进行 (1.0, 1.2, 1.4, 1.6, ... 2.6, 2.8, 3.0) 倍的放缩逐一比较，以达到最佳的适配效果
-    scale=(1, 3, 10),
+    engine_template_scale=(1, 3, 10),
     # 默认的模板匹配算法为 TM_CCORR_NORMED
     # 你也可以在此处修改为你偏好的
-    cv_method_name='cv2.TM_CCORR_NORMED',
+    engine_template_cv_method_name='cv2.TM_CCORR_NORMED',
+
+    # 特征识别相关
+    # 距离阈值
+    engine_feature_distance_threshold=0.75,
+    # 聚类核心数
+    engine_feature_cluster_num=3,
 )
 
 # 加载模板
