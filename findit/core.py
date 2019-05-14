@@ -81,6 +81,7 @@ class FindIt(object):
              target_pic_name: str,
              target_pic_path: str = None,
              target_pic_object: np.ndarray = None,
+             mark_pic: bool = None,
              *args, **kwargs):
         """
         start match
@@ -88,6 +89,7 @@ class FindIt(object):
         :param target_pic_name: eg: 'your_target_picture_1'
         :param target_pic_path: '/path/to/your/target.png'
         :param target_pic_object: your_pic_cv_object (loaded by cv2)
+        :param mark_pic: enable this, and you will get a picture file with a mark of result
         :return:
         """
 
@@ -107,9 +109,23 @@ class FindIt(object):
             for each_engine in self.engine_list:
                 each_result = each_engine.execute(each_template_object, target_pic_object, *args, **kwargs)
 
+                # need mark?
+                if mark_pic:
+                    target_pic_object_with_mark = toolbox.mark_point(
+                        target_pic_object,
+                        each_result['target_point'],
+                        cover=False)
+                    mark_pic_path = '{}_{}_{}.png'.format(
+                        each_template_name,
+                        each_engine.get_type(),
+                        toolbox.get_timestamp())
+                    cv2.imwrite(mark_pic_path, target_pic_object_with_mark)
+                    logger.debug('save marked picture to {}'.format(mark_pic_path))
+
                 # if not in pro mode,
                 if not self.pro_mode:
                     each_result = each_result['target_point']
+
                 current_result[each_engine.get_type()] = each_result
 
             logger.debug('result for [{}]: {}'.format(each_template_name, json.dumps(current_result)))
