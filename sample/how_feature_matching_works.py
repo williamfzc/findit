@@ -7,8 +7,8 @@
 import cv2 as cv
 import matplotlib.pyplot as plt
 
-img1 = cv.imread('wechat_logo.png', cv.IMREAD_GRAYSCALE)  # queryImage
-img2 = cv.imread('wechat_screen.png', cv.IMREAD_GRAYSCALE)  # trainImage
+img1 = cv.imread('pics/wechat_logo.png', cv.IMREAD_GRAYSCALE)  # queryImage
+img2 = cv.imread('pics/screen.png', cv.IMREAD_GRAYSCALE)  # trainImage
 
 # Initiate SIFT detector
 sift = cv.xfeatures2d.SIFT_create()
