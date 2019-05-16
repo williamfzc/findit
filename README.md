@@ -11,7 +11,7 @@
 
 该工具主要作为基础组件出现，用于在目标图像中寻找模板图片的位置。
 
-![feature_matching](sample/feature_matching_sample.png)
+![feature_matching](sample/pics/feature_matching_sample.png)
 
 目前，[stagesep2](https://github.com/williamfzc/stagesep2) 与 [fitch](https://github.com/williamfzc/fitch) 均使用该工具作为图像处理引擎。
 
@@ -19,11 +19,11 @@
 
 例如你有两张图片，分别是微信图标：
 
-![wechat_icon](sample/wechat_logo.png)
+![wechat_icon](sample/pics/wechat_logo.png)
 
 与包含微信图标的手机截图：
 
-![wechat_screen](sample/wechat_screen.png)
+![wechat_screen](sample/pics/screen.png)
 
 那么，你只需要：
 
@@ -37,7 +37,7 @@ fi.load_template('app_store_logo', pic_path='app_store_logo.png')
 
 result = fi.find(
     target_pic_name='screen',
-    target_pic_path='wechat_screen.png',
+    target_pic_path='screen.png',
 )
 
 pprint.pprint(result)
@@ -81,7 +81,7 @@ pprint.pprint(result)
                                                        344.0),
                                       'target_sim': 0.998754620552063}},
  'target_name': 'screen',
- 'target_path': 'wechat_screen.png'}
+ 'target_path': 'screen.png'}
 ```
 
 更多丰富用法请参考 [demo.py](sample/demo.py)。
