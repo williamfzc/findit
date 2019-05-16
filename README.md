@@ -25,7 +25,25 @@
 
 ![wechat_screen](sample/wechat_screen.png)
 
-那么，通过这个工具，你可以得到：
+那么，你只需要：
+
+```python
+import pprint
+from findit import FindIt
+
+fi = FindIt()
+fi.load_template('wechat_logo', pic_path='wechat_logo.png')
+fi.load_template('app_store_logo', pic_path='app_store_logo.png')
+
+result = fi.find(
+    target_pic_name='screen',
+    target_pic_path='wechat_screen.png',
+)
+
+pprint.pprint(result)
+```
+
+就可以得到：
 
 ```text
 {'data': {'app_store_logo': {'FeatureEngine': (94.66734313964844,
@@ -40,10 +58,8 @@
 
 通过上述数据可以知道，微信图标最可能出现的点位：
 
-- Feature Matching 的计算结果是 `(514, 378)`
+- Feature Matching 的计算结果是 `(528, 383)`
 - Template Matching 的计算结果是 `(475, 344)`
-
-可以根据实际需要取舍。
 
 你还可以打开专业模式用于更加全面的数据：
 
@@ -68,9 +84,15 @@
  'target_path': 'wechat_screen.png'}
 ```
 
-## 使用
-
 更多丰富用法请参考 [demo.py](sample/demo.py)。
+
+## 安装
+
+python3.6+
+
+```bash
+pip install findit
+```
 
 ## 相关参考
 
