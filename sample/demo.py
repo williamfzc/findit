@@ -52,6 +52,10 @@ result = fi.find(
     # 同样的，你可以传入图片路径或对象
     # mask_pic_path='wechat_logo.png',
     # mask_pic_object=some_object,
+
+    # 如果你希望确认分析结果，你可以打开 mark_pic 开关
+    # 打开后，将会保存一张 标记了最终结果 的图片到本地，供参考用
+    mark_pic=True,
 )
 
 # 在分析后，你可以通过 clear 重置所有模板。当然你也可以选择保留以进行其他分析。

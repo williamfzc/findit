@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import imutils
 import typing
+import copy
+import datetime
 
 
 class Point(object):
@@ -47,3 +49,21 @@ def fix_location(shape: typing.Sequence, location: typing.Sequence) -> typing.Se
     size_x, size_y = shape
     old_x, old_y = location
     return old_x + size_x / 2, old_y + size_y / 2
+
+
+def mark_point(pic_object: np.ndarray,
+               location: typing.Sequence,
+               cover: bool = None) -> np.ndarray:
+    """ draw a mark on your picture, or your picture copy. """
+    if not cover:
+        pic_object = copy.deepcopy(pic_object)
+    distance = 50
+    target_x, target_y = map(int, location)
+    start_point = (target_x - distance, target_y - distance)
+    end_point = (target_x + distance, target_y + distance)
+    cv2.rectangle(pic_object, start_point, end_point, -1)
+    return pic_object
+
+
+def get_timestamp() -> str:
+    return datetime.datetime.now().strftime('%Y%m%d%H%M%S')
