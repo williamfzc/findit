@@ -12,3 +12,4 @@ install:
 script:
   - cd sample
   - python demo.py
+  - python short.py
