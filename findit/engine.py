@@ -150,6 +150,14 @@ class FeatureEngine(FindItEngine):
                 target_object: np.ndarray,
                 *_, **__) -> dict:
         point_list = self.get_feature_point_list(template_object, target_object)
+        
+        # no point found
+        if not point_list:
+            return {
+                'target_point': (-1, -1),
+                'raw': [],
+            }
+
         center_point = self.calculate_center_point(point_list)
 
         readable_point_list = [each.to_tuple() for each in point_list]
