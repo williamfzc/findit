@@ -48,10 +48,10 @@ pprint.pprint(result)
 ```text
 {'data': {'app_store_logo': {'FeatureEngine': (94.66734313964844,
                                                380.8362731933594),
-                             'TemplateEngine': (56.0, 340.0)},
+                             'TemplateEngine': (94.5, 378.5)},
           'wechat_logo': {'FeatureEngine': (528.9216674804687,
                                             383.21449890136716),
-                          'TemplateEngine': (475.0, 344.0)}},
+                          'TemplateEngine': (505.5, 374.5)}},
  'target_name': 'screen',
  'target_path': 'wechat_screen.png'}
 ```
@@ -59,7 +59,7 @@ pprint.pprint(result)
 通过上述数据可以知道，微信图标最可能出现的点位：
 
 - Feature Matching 的计算结果是 `(528, 383)`
-- Template Matching 的计算结果是 `(475, 344)`
+- Template Matching 的计算结果是 `(505, 374)`
 
 你还可以打开专业模式用于更加全面的数据：
 

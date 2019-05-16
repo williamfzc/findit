@@ -42,8 +42,8 @@ def resize_pic_scale(pic_object: np.ndarray, target_scale: np.ndarray) -> np.nda
     return imutils.resize(pic_object, width=int(pic_object.shape[1] * target_scale))
 
 
-def fix_location(pic_object: np.ndarray, location: typing.Sequence):
+def fix_location(shape: typing.Sequence, location: typing.Sequence) -> typing.Sequence:
     """ location from cv2 should be left-top location, and need to fix it and make it central """
-    size_x, size_y = pic_object.shape
+    size_x, size_y = shape
     old_x, old_y = location
     return old_x + size_x / 2, old_y + size_y / 2

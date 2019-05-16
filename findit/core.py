@@ -18,6 +18,7 @@ class FindIt(object):
                  pro_mode: bool = None,
                  *args, **kwargs):
         """
+        Init everything. Args here will init the engines too. Read __init__ part in engine.py for details.
 
         :param need_log: enable or disable logger
         :param engine: choose image processing engine, eg: ['feature', 'template']

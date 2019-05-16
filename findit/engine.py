@@ -66,9 +66,6 @@ class TemplateEngine(FindItEngine):
             self.scale,
             mask_pic_object
         )
-        logger.debug('raw compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
-        min_loc, max_loc = map(lambda i: toolbox.fix_location(template_object, i), [min_loc, max_loc])
-        logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
 
         # 'target_point' must existed
         return {
@@ -119,11 +116,17 @@ class TemplateEngine(FindItEngine):
                 resize_template_pic_object,
                 self.cv_method_code,
                 mask=resize_mask_pic_object)
-            result_list.append(cv2.minMaxLoc(res))
+            current_result = [cv2.minMaxLoc(res), resize_template_pic_object.shape]
+            result_list.append(current_result)
 
         logger.debug('scale search result: {}'.format(result_list))
-        # return the max one
-        return sorted(result_list, key=lambda i: i[1])[-1]
+        # get the best one
+        loc_val, shape = sorted(result_list, key=lambda i: i[0][1])[-1]
+        min_val, max_val, min_loc, max_loc = loc_val
+        logger.debug('raw compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
+        min_loc, max_loc = map(lambda each_location: toolbox.fix_location(shape, each_location), [min_loc, max_loc])
+        logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
+        return min_val, max_val, min_loc, max_loc
 
 
 class FeatureEngine(FindItEngine):
