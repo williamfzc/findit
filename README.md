@@ -32,12 +32,12 @@ import pprint
 from findit import FindIt
 
 fi = FindIt()
-fi.load_template('wechat_logo', pic_path='wechat_logo.png')
-fi.load_template('app_store_logo', pic_path='app_store_logo.png')
+fi.load_template('wechat_logo', pic_path='pics/wechat_logo.png')
+fi.load_template('app_store_logo', pic_path='pics/app_store_logo.png')
 
 result = fi.find(
     target_pic_name='screen',
-    target_pic_path='screen.png',
+    target_pic_path='pics/screen.png',
 )
 
 pprint.pprint(result)
@@ -46,45 +46,21 @@ pprint.pprint(result)
 就可以得到：
 
 ```text
-{'data': {'app_store_logo': {'FeatureEngine': (94.66734313964844,
-                                               380.8362731933594),
-                             'TemplateEngine': (94.5, 378.5)},
-          'wechat_logo': {'FeatureEngine': (528.9216674804687,
-                                            383.21449890136716),
+{'data': {'app_store_logo': {'FeatureEngine': (96.2968017578125,
+                                               386.9249633789062),
+                             'TemplateEngine': (92.0, 382.0)},
+          'wechat_logo': {'FeatureEngine': (524.6688232421875, 364.54248046875),
                           'TemplateEngine': (505.5, 374.5)}},
  'target_name': 'screen',
- 'target_path': 'wechat_screen.png'}
+ 'target_path': 'pics/screen.png'}
 ```
 
 通过上述数据可以知道，微信图标最可能出现的点位：
 
-- Feature Matching 的计算结果是 `(528, 383)`
+- Feature Matching 的计算结果是 `(524, 364)`
 - Template Matching 的计算结果是 `(505, 374)`
 
-你还可以打开专业模式用于更加全面的数据：
-
-```text
-{'data': {'logo': {'FeatureEngine': {'raw': [(478.89141845703125,
-                                              401.2875671386719),
-                                             ...
-                                             (538.511962890625,
-                                              419.835693359375)],
-                                     'target_point': (514.9602440728081,
-                                                      378.0506947835286)},
-                   'TemplateEngine': {'raw': {'max_loc': (475.0,
-                                                          344.0),
-                                              'max_val': 0.998754620552063,
-                                              'min_loc': (39.0,
-                                                          30.0),
-                                              'min_val': 0.8025140762329102},
-                                      'target_point': (475.0,
-                                                       344.0),
-                                      'target_sim': 0.998754620552063}},
- 'target_name': 'screen',
- 'target_path': 'screen.png'}
-```
-
-更多丰富用法请参考 [demo.py](sample/demo.py)。
+上述完整例子与图片在[sample](sample)中。更多进阶用法请参考 [sample/demo.py](sample/demo.py)。
 
 ## 安装
 
