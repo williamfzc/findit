@@ -180,12 +180,12 @@ class FeatureEngine(FindItEngine):
         :param target_pic_object:
         :return:
         """
-        # Initiate SIFT detector
-        sift = cv2.xfeatures2d.SIFT_create()
+        # Initiate SURF detector
+        surf = cv2.xfeatures2d.SURF_create()
 
-        # find the keypoints and descriptors with SIFT
-        _, des1 = sift.detectAndCompute(template_pic_object, None)
-        kp2, des2 = sift.detectAndCompute(target_pic_object, None)
+        # find the keypoints and descriptors with SURF
+        kp1, des1 = surf.detectAndCompute(template_pic_object, None)
+        kp2, des2 = surf.detectAndCompute(target_pic_object, None)
 
         # BFMatcher with default params
         bf = cv2.BFMatcher()
