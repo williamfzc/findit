@@ -70,6 +70,14 @@ python3.6+
 pip install findit
 ```
 
+另外，如果你希望体验未发布的最新特性，你可以选择从源码安装：
+
+```bash
+git clone https://github.com/williamfzc/findit.git
+cd findit
+pip install -e .
+```
+
 ## 相关参考
 
 - [feature matching](sample/how_feature_matching_works.py)
