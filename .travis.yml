@@ -14,4 +14,5 @@ script:
   - cd sample
   - python demo.py
   - python short.py
+  - cd ..
   - pytest tests/
