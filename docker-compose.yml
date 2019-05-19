@@ -1,0 +1,30 @@
+version: '3'
+services:
+  # 主要用于文件管理，提供给用户使用
+  findit_filebrowser:
+    container_name: findit_filebrowser
+    image: filebrowser/filebrowser
+    restart: always
+    volumes:
+      - ~/findit_server_workspace/pic_home/srv:/srv
+    ports:
+      - "29410:80"
+
+  # 主要用于文件访问，提供给机器使用
+  findit_fileserver:
+    container_name: findit_fileserver
+    image: williamfzc/min_file_server
+    restart: always
+    volumes:
+      - ~/findit_server_workspace/pic_home/srv:/usr/share/nginx/files
+    ports:
+      - "29411:80"
+
+  findit_core:
+    container_name: findit_core
+    image: williamfzc/findit
+    restart: always
+    volumes:
+      - ~/findit_server_workspace/pic_home/srv:/root/pics
+    ports:
+      - "29412:9410"
