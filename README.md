@@ -1,13 +1,18 @@
-# findit
+<h1 align="center">findit</h1>
+<p align="center">
+    <em>利用opencv，对图像进行模板匹配，并得到模板在图片中出现与否及其位置。</em>
+</p>
+
+---
 
 [![Python 3.6](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![PyPI version](https://badge.fury.io/py/findit.svg)](https://badge.fury.io/py/findit)
 [![Build Status](https://travis-ci.org/williamfzc/findit.svg?branch=master)](https://travis-ci.org/williamfzc/findit)
 [![Maintainability](https://api.codeclimate.com/v1/badges/d824d06146383ef721c8/maintainability)](https://codeclimate.com/github/williamfzc/findit/maintainability)
 
-利用opencv，对图像进行模板匹配，并得到模板在图片中出现与否及其位置。
+---
 
-## 定位
+# 定位
 
 该工具主要作为基础组件出现，用于在目标图像中寻找模板图片的位置。
 
@@ -15,9 +20,9 @@
 
 目前，[stagesep2](https://github.com/williamfzc/stagesep2) 与 [fitch](https://github.com/williamfzc/fitch) 均使用该工具作为图像处理引擎。
 
-## 使用
+# 使用
 
-### 常规模式
+## 常规模式
 
 例如你有两张图片，分别是微信图标：
 
@@ -64,11 +69,11 @@ pprint.pprint(result)
 
 上述完整例子与图片在[sample](sample)中。更多进阶用法请参考 [sample/demo.py](sample/demo.py)。
 
-### Client/Server 模式
+## Client/Server 模式
 
 请参见 [#3](https://github.com/williamfzc/findit/issues/3)
 
-## 安装
+# 安装
 
 python3.6+
 
@@ -84,15 +89,15 @@ cd findit
 pip install -e .
 ```
 
-## 相关参考
+# 相关参考
 
 - [feature matching](sample/how_feature_matching_works.py)
 - [template matching](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_template_matching/py_template_matching.html)
 
-## 旧版本
+# 旧版本
 
 稳定（旧）版本会存在于 [stable 分支](https://github.com/williamfzc/findit/tree/stable) 并在重要节点同步。
 
-## LICENSE
+# LICENSE
 
 [MIT](LICENSE)
