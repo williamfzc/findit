@@ -7,7 +7,8 @@
 
 [![Python 3.6](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![PyPI version](https://badge.fury.io/py/findit.svg)](https://badge.fury.io/py/findit)
-[![Build Status](https://travis-ci.org/williamfzc/findit.svg?branch=master)](https://travis-ci.org/williamfzc/findit)
+![Travis (.org)](https://img.shields.io/travis/williamfzc/findit.svg?label=Travis%20CI)
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/williamfzc/findit.svg)
 [![Maintainability](https://api.codeclimate.com/v1/badges/d824d06146383ef721c8/maintainability)](https://codeclimate.com/github/williamfzc/findit/maintainability)
 
 ---
