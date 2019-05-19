@@ -191,6 +191,11 @@ class FeatureEngine(FindItEngine):
         bf = cv2.BFMatcher()
         matches = bf.knnMatch(des1, des2, k=2)
 
+        # TODO here is a sample to show feature points
+        # temp = cv2.drawMatchesKnn(template_pic_object, kp1, target_pic_object, kp2, matches, None, flags=2)
+        # cv2.imshow('feature_points', temp)
+        # cv2.waitKey(0)
+
         # Apply ratio test
         good = []
         for m, n in matches:
