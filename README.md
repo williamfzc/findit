@@ -22,17 +22,7 @@
 
 # 使用
 
-## 常规模式
-
-请参见 [以常规模式使用](https://github.com/williamfzc/findit/wiki/以常规模式使用)
-
-## Client/Server 模式
-
-请参见 [以Client/Server模式部署](https://github.com/williamfzc/findit/wiki/以-Client-Server-模式部署)
-
-# 安装
-
-请参见 [安装findit](https://github.com/williamfzc/findit/wiki/安装)
+请参见 [官方wiki](https://github.com/williamfzc/findit/wiki)
 
 # 相关参考
 
