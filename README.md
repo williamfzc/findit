@@ -15,7 +15,9 @@
 
 目前，[stagesep2](https://github.com/williamfzc/stagesep2) 与 [fitch](https://github.com/williamfzc/fitch) 均使用该工具作为图像处理引擎。
 
-## 使用场景
+## 使用
+
+### 常规模式
 
 例如你有两张图片，分别是微信图标：
 
@@ -61,6 +63,10 @@ pprint.pprint(result)
 - Template Matching 的计算结果是 `(505, 374)`
 
 上述完整例子与图片在[sample](sample)中。更多进阶用法请参考 [sample/demo.py](sample/demo.py)。
+
+### Client/Server 模式
+
+请参见 [#3](https://github.com/williamfzc/findit/issues/3)
 
 ## 安装
 
