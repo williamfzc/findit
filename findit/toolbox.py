@@ -4,6 +4,9 @@ import imutils
 import typing
 import copy
 import datetime
+import tempfile
+import contextlib
+import os
 
 
 class Point(object):
@@ -67,3 +70,13 @@ def mark_point(pic_object: np.ndarray,
 
 def get_timestamp() -> str:
     return datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+
+
+@contextlib.contextmanager
+def cv2file(pic_object: np.ndarray) -> str:
+    """ save cv object to file, and return its path """
+    temp_pic_file_object = tempfile.NamedTemporaryFile(mode='wb+', suffix='.png', delete=False)
+    cv2.imwrite(temp_pic_file_object.name, pic_object)
+    temp_pic_file_object_path = temp_pic_file_object.name
+    yield temp_pic_file_object_path
+    os.remove(temp_pic_file_object_path)

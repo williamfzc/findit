@@ -1,5 +1,8 @@
 import requests
 import requests.exceptions
+import numpy as np
+
+from findit import toolbox
 
 
 class FindItClient(object):
@@ -16,7 +19,7 @@ class FindItClient(object):
         except requests.exceptions.ConnectionError:
             return False
 
-    def analyse(self, target_pic_path: str, template_pic_name: str):
+    def analyse_with_path(self, target_pic_path: str, template_pic_name: str) -> dict:
         with open(target_pic_path, 'rb+') as f:
             pic_data = f.read()
         resp = requests.post(
@@ -26,9 +29,14 @@ class FindItClient(object):
         )
         return resp.json()
 
+    def analyse_with_object(self, target_pic_object: np.ndarray, template_pic_name: str) -> dict:
+        with toolbox.cv2file(target_pic_object) as temp_path:
+            analyse_result = self.analyse_with_path(temp_path, template_pic_name)
+        return analyse_result
+
 
 if __name__ == '__main__':
     cli = FindItClient()
     assert cli.heartbeat()
-    result = cli.analyse('../sample/pics/screen.png', 'wechat_logo.png')
+    result = cli.analyse_with_path('../sample/pics/screen.png', 'wechat_logo.png')
     print(result)
