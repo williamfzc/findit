@@ -1,6 +1,6 @@
 <h1 align="center">findit</h1>
 <p align="center">
-    <em>利用opencv，对图像进行模板匹配，并得到模板在图片中出现与否及其位置。</em>
+    <em>Find target icon on your picture, and get its position.</em>
 </p>
 
 ---
@@ -15,26 +15,15 @@
 
 # 定位
 
-该工具主要作为基础组件出现，用于在目标图像中寻找模板图片的位置。
+![feature_matching](docs/pics/feature_matching_sample.png)
 
-![feature_matching](sample/pics/feature_matching_sample.png)
+findit 极大简化了图像识别的繁琐流程，强大而简洁的API让你只需要几行代码就可以在你的目标图片中找到模板图片的位置！
 
 目前，[stagesep2](https://github.com/williamfzc/stagesep2) 与 [fitch](https://github.com/williamfzc/fitch) 均使用该工具作为图像处理引擎。
 
-# 使用
+# 快速开始
 
-请参见 [官方wiki](https://github.com/williamfzc/findit/wiki)
-
-# 相关参考
-
-findit 主要用到了 feature matching 与 template matching 。
-
-- [feature matching](sample/how_feature_matching_works.py)
-- [template matching](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_template_matching/py_template_matching.html)
-
-# 旧版本
-
-稳定（旧）版本会存在于 [stable 分支](https://github.com/williamfzc/findit/tree/stable) 并在重要节点同步。
+ 从我们的 [官方文档](https://williamfzc.github.io/findit/) 开始吧！
 
 # LICENSE
 
