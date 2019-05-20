@@ -1,0 +1,37 @@
+<h1 align="center">findit</h1>
+<p align="center">
+    <em>Find target icon on your picture, and get its position.</em>
+</p>
+
+---
+
+[![Python 3.6](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-360/)
+[![PyPI version](https://badge.fury.io/py/findit.svg)](https://badge.fury.io/py/findit)
+![Travis (.org)](https://img.shields.io/travis/williamfzc/findit.svg?label=Travis%20CI)
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/williamfzc/findit.svg)
+[![Maintainability](https://api.codeclimate.com/v1/badges/d824d06146383ef721c8/maintainability)](https://codeclimate.com/github/williamfzc/findit/maintainability)
+
+---
+
+# 定位
+
+该工具主要作为基础组件出现，用于在目标图像中寻找模板图片的位置。
+
+![feature_matching](../pics/feature_matching_sample.png)
+
+目前，[stagesep2](https://github.com/williamfzc/stagesep2) 与 [fitch](https://github.com/williamfzc/fitch) 均使用该工具作为图像处理引擎。
+
+# 相关参考
+
+findit 主要用到了 feature matching 与 template matching 。
+
+- [feature matching](https://docs.opencv.org/3.4/dc/dc3/tutorial_py_matcher.html)
+- [template matching](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_template_matching/py_template_matching.html)
+
+# 旧版本
+
+稳定（旧）版本会存在于 [stable 分支](https://github.com/williamfzc/findit/tree/stable) 并在重要节点同步。
+
+# LICENSE
+
+[MIT](LICENSE)
