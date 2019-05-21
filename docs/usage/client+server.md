@@ -33,6 +33,12 @@ docker-compose up -d
 
 ## 客户端配置
 
+客户端通过http请求与服务端进行通信，并以此获取findit的能力。也就是说：
+
+- 它并不需要很高的性能，因为计算都是在服务端进行的，所以你大可以在低端机器（例如树莓派）上使用客户端
+- 依赖非常少，甚至可以无需opencv
+- 多语言支持！
+
 客户端项目：https://github.com/williamfzc/findit-client
 
 ## 一个完整例子
