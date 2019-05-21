@@ -22,17 +22,17 @@ def get_pic_path_by_name(pic_name: str) -> str:
 
 def handle_extras(extra_dict: dict) -> dict:
     """ filter for extras """
-    extra_dict_after_filter = {k: v for k, v in extra_dict.items() if k in config.ALLOWED_EXTRA_ARGS}
+
+    # TODO need a filter? ... for safety
+    # extra_dict_after_filter = {k: v for k, v in extra_dict.items() if k in config.ALLOWED_EXTRA_ARGS}
 
     # mask pic path
     mask_pic_path_key = 'mask_pic_path'
-    if mask_pic_path_key in extra_dict_after_filter:
-        extra_dict_after_filter[mask_pic_path_key] = get_pic_path_by_name(
-            extra_dict_after_filter[mask_pic_path_key])
+    if mask_pic_path_key in extra_dict:
+        extra_dict[mask_pic_path_key] = get_pic_path_by_name(extra_dict[mask_pic_path_key])
 
     # and so on ...
-
-    return extra_dict_after_filter
+    return extra_dict
 
 
 # init server
