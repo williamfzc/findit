@@ -9,6 +9,7 @@ install_requirement_list = [
     'opencv-contrib-python==3.4.2.17',
     'scikit-learn',
     'flask',
+    'gevent',
 ]
 
 setup(

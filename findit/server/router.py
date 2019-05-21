@@ -6,33 +6,7 @@ from flask import Flask, request, jsonify
 
 from findit import FindIt
 import findit.server.config as config
-
-
-# utils
-def get_pic_path_by_name(pic_name: str) -> str:
-    # auto fix ext name
-    if '.' not in pic_name:
-        pic_name += config.PIC_EXT_NAME
-
-    result = os.path.join(config.PIC_DIR_PATH, pic_name)
-    if not os.path.isfile(result):
-        return ''
-    return result
-
-
-def handle_extras(extra_dict: dict) -> dict:
-    """ filter for extras """
-
-    # TODO need a filter? ... for safety
-    # extra_dict_after_filter = {k: v for k, v in extra_dict.items() if k in config.ALLOWED_EXTRA_ARGS}
-
-    # mask pic path
-    mask_pic_path_key = 'mask_pic_path'
-    if mask_pic_path_key in extra_dict:
-        extra_dict[mask_pic_path_key] = get_pic_path_by_name(extra_dict[mask_pic_path_key])
-
-    # and so on ...
-    return extra_dict
+import findit.server.utils as utils
 
 
 # init server
@@ -48,7 +22,7 @@ def hello():
 def analyse():
     # required
     template_name = request.form.get('template_name')
-    template_path = get_pic_path_by_name(template_name)
+    template_path = utils.get_pic_path_by_name(template_name)
     if not template_path:
         return jsonify({
             'error': 'no template named {}'.format(template_name)
@@ -56,7 +30,7 @@ def analyse():
 
     # optional
     extra_dict = json.loads(request.form.get('extras'))
-    new_extra_dict = handle_extras(extra_dict)
+    new_extra_dict = utils.handle_extras(extra_dict)
 
     # save target pic
     target_pic_file = request.files['file']

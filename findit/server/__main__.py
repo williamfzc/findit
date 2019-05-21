@@ -1,10 +1,12 @@
-from findit.server.server import app
+from findit.server.router import app
 import findit.server.config as config
 
 
 if __name__ == '__main__':
     import argparse
     import os
+    from gevent import monkey, pywsgi
+    monkey.patch_all()
 
     # TODO load from env?
     parser = argparse.ArgumentParser()
@@ -19,7 +21,5 @@ if __name__ == '__main__':
     # save port
     config.SERVER_PORT = int(args.port or 9410)
 
-    app.run(
-        host='0.0.0.0',
-        port=config.SERVER_PORT,
-    )
+    server = pywsgi.WSGIServer(('0.0.0.0', config.SERVER_PORT), app)
+    server.serve_forever()
