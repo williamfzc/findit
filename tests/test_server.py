@@ -3,9 +3,9 @@ import subprocess
 import cv2
 import time
 
-from findit.client import FindItClient
+from findit_client import FindItStandardClient
 
-find_it_client = FindItClient()
+find_it_client = FindItStandardClient()
 
 
 @pytest.fixture(scope="session", autouse=True)
