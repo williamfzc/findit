@@ -8,7 +8,6 @@ install_requirement_list = [
     'loguru',
     'opencv-contrib-python==3.4.2.17',
     'scikit-learn',
-    'requests',
     'flask',
 ]
 
