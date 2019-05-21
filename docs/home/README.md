@@ -13,13 +13,20 @@
 
 ---
 
-# 定位
+# 产品定位
 
 该工具主要作为基础组件出现，用于在目标图像中寻找模板图片的位置。
 
 ![feature_matching](../pics/feature_matching_sample.png)
 
 目前，[stagesep2](https://github.com/williamfzc/stagesep2) 与 [fitch](https://github.com/williamfzc/fitch) 均使用该工具作为图像处理引擎。
+
+# 工作形态
+
+findit主要以两种形态出现：
+
+- [python包模式](../usage/normal.md) 下，findit能够直接以常规第三方库的形式嵌入到你的工作框架中，为你的框架提供原生的图像识别能力。
+- [C/S模式](../usage/client+server.md) 更加适用于正式环境，完善的部署与工作流程，同时涵盖了模板图片管理等一系列强大特性，为你的团队带来更大规模的图像识别服务。
 
 # 相关参考
 
