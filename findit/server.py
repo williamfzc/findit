@@ -12,12 +12,17 @@ parser.add_argument('-d', '--dir', help="pictures root directory", required=True
 args = parser.parse_args()
 
 # init pic dir
+PIC_EXT_NAME = '.png'
 PIC_DIR_PATH = args.dir
 assert os.path.exists(PIC_DIR_PATH), 'dir path not existed'
 
 
 # utils
 def get_pic_path_by_name(pic_name: str) -> str:
+    # auto fix ext name
+    if '.' not in pic_name:
+        pic_name += PIC_EXT_NAME
+
     result = os.path.join(PIC_DIR_PATH, pic_name)
     if not os.path.isfile(result):
         return ''
