@@ -76,6 +76,7 @@ pprint.pprint(result)
 
 # take this as a test case in travis (just a very simple check)
 
+# TODO move these to test case
 assert 'data' in result
 assert 'target_name' in result
 assert 'target_path' in result

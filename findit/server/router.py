@@ -15,6 +15,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
+    # TODO standard response, eg: status/msg and something else
     return "Hello From FindIt Server"
 
 
@@ -51,6 +52,6 @@ def analyse():
     os.remove(temp_pic_file_object.name)
 
     return jsonify({
-        'request': request.form,
+        'request': request,
         'response': _response,
     })

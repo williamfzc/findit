@@ -130,6 +130,7 @@ class TemplateEngine(FindItEngine):
 
 
 class FeatureEngine(FindItEngine):
+    # TODO need many sample pictures to test
     DEFAULT_CLUSTER_NUM = 3
     DEFAULT_DISTANCE_THRESHOLD = 0.75
 
