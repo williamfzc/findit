@@ -1,13 +1,20 @@
 # Client/Server 模式
 
-为了后续更好的应用，findit的理论形态应该是配置在服务器上。主要有两个问题：
+findit的最佳实践是配置在服务器上，以服务的形式满足不同的开发需要。这种架构主要为了解决两个问题：
 
 - 图像识别效果更精确势必需要更高的算力。服务化之后，计算部分可以使用局域网内更高配置的机器来执行。
-- 顺带解决大量模板图片的管理问题。
+- 解决大量模板图片的规范化管理问题。
 
-![](https://user-images.githubusercontent.com/13421694/57979135-c6ebf880-7a4b-11e9-87bc-5b80e0756d35.png)
+![](../pics/client+server.svg)
 
-通过配置，findit-client 能够连接到本地或者远程的 findit-server，以适应不同的需求。换言之，你可以在其他设备上使用client直接调用远程的findit，而本地无需opencv环境。这种做法使得你能够在更低配置的客户机（例如树莓派等）上使用findit服务。
+上图为一套完整的工作形态：
+
+- [filebrowser](https://github.com/filebrowser/filebrowser)提供了极其方便的界面让用户能够直接用界面管理大量的模板图片，对他们分类及相应的规范化管理；
+- findit-server 能够直接加载filebrowser的目录，并通过http协议与 findit-client 进行通信。你无须在客户机上管理模板图片。只要网络相通，你可以在任何地方使用findit服务；
+- findit-client 是跨语言（甚至可以用shell）且跨平台的，只要具备http请求的能力！这意味着：
+    - 能够在**不同机器、不同平台**上无痛接入findit的服务；
+    - 本地**并不需要**安装相应的依赖；
+    - 并不需要很高的性能，本地硬件需求低
 
 ## 服务端部署
 
@@ -33,13 +40,11 @@ docker-compose up -d
 
 ## 客户端配置
 
-客户端通过http请求与服务端进行通信，并以此获取findit的能力。也就是说：
+目前我们提供了python版本的client，其他语言待开发，如果有兴趣的话欢迎加入！
 
-- 它并不需要很高的性能，因为计算都是在服务端进行的，所以你大可以在低端机器（例如树莓派）上使用客户端
-- 依赖非常少，甚至可以无需opencv
-- 多语言支持！
-
-客户端项目：https://github.com/williamfzc/findit-client
+- [python2/3](https://github.com/williamfzc/findit-client)
+- java
+- ...
 
 ## 一个完整例子
 

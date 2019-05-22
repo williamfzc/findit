@@ -1,6 +1,6 @@
 <h1 align="center">findit</h1>
 <p align="center">
-    <em>Find target icon on your picture, and get its position.</em>
+    <em>Find target icon on your picture, and get its position. Painlessly, privately, standardly.</em>
 </p>
 
 ---
@@ -13,15 +13,14 @@
 
 ---
 
-# 定位
+![cs_service](docs/pics/client+server.svg)
 
-![feature_matching](docs/pics/feature_matching_sample.png)
+旨在提供：
 
-findit 极大简化了图像识别的繁琐流程，强大而简洁的API让你只需要几行代码就可以在你的目标图片中找到模板图片的位置！
-
-目前，[stagesep2](https://github.com/williamfzc/stagesep2) 与 [fitch](https://github.com/williamfzc/fitch) 均使用该工具作为图像处理引擎。
-
-# 快速开始
+- 为你、你的团队、你的自动化系统
+- 规范化、安全、高效
+- 跨平台与多语言
+- 目标图片识别与图片管理服务
 
  从我们的 [官方文档](https://williamfzc.github.io/findit/) 开始吧！
 
