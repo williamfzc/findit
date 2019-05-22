@@ -25,6 +25,9 @@ def test_analyse_with_path():
     result = find_it_client.analyse_with_path('sample/pics/screen.png', 'wechat_logo.png')
     assert 'request' in result
     assert 'response' in result
+    assert 'msg' in result
+    assert 'status' in result
+
     assert 'extras' in result['request']
     assert 'template_name' in result['request']
     assert 'data' in result['response']
@@ -35,6 +38,9 @@ def test_analyse_with_object():
     result = find_it_client.analyse_with_object(pic_object, 'wechat_logo.png')
     assert 'request' in result
     assert 'response' in result
+    assert 'msg' in result
+    assert 'status' in result
+
     assert 'extras' in result['request']
     assert 'template_name' in result['request']
     assert 'data' in result['response']
@@ -42,6 +48,11 @@ def test_analyse_with_object():
 
 def test_analyse_with_extras():
     result = find_it_client.analyse_with_path('sample/pics/screen.png', 'wechat_logo.png', a='123', b='456')
+
+    assert 'request' in result
+    assert 'response' in result
+    assert 'msg' in result
+    assert 'status' in result
 
     assert 'extras' in result['request']
     assert 'a' in result['request']['extras']
