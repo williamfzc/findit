@@ -2,15 +2,18 @@ import pytest
 import subprocess
 import cv2
 import time
+import random
 
 from findit_client import FindItStandardClient
 
-find_it_client = FindItStandardClient()
+# globals
+PORT = random.randint(9409, 11000)
+find_it_client = FindItStandardClient(port=PORT)
 
 
 @pytest.fixture(scope="session", autouse=True)
 def life_time():
-    server_process = subprocess.Popen('python3 -m findit.server --dir sample/pics', shell=True)
+    server_process = subprocess.Popen('python -m findit.server --dir sample/pics --port {}'.format(PORT), shell=True)
     time.sleep(3)
     yield
     server_process.terminate()
