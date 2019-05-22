@@ -2,11 +2,23 @@
 import os
 import tempfile
 import json
+from collections import namedtuple
 from flask import Flask, request, jsonify
 
 from findit import FindIt
 import findit.server.config as config
 import findit.server.utils as utils
+
+# standard response
+_FindItResponse = namedtuple('FindItResponse', ('status', 'msg', 'request', 'response'))
+STATUS_OK = 'OK'
+STATUS_CLIENT_ERROR = 'CLIENT_ERROR'
+STATUS_SERVER_ERROR = 'SERVER_ERROR'
+
+
+def std_response(**kwargs):
+    _response = _FindItResponse(**kwargs)
+    return jsonify(_response)
 
 
 # init server
@@ -15,8 +27,14 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    # TODO standard response, eg: status/msg and something else
-    return "Hello From FindIt Server"
+    return std_response(
+        status=STATUS_OK,
+        msg='hello from findit :) response will always contains status/msg/request/response.',
+        request=request.form,
+        response={
+            'hello': 'world',
+        }
+    )
 
 
 @app.route("/analyse", methods=['POST'])
@@ -25,9 +43,12 @@ def analyse():
     template_name = request.form.get('template_name')
     template_path = utils.get_pic_path_by_name(template_name)
     if not template_path:
-        return jsonify({
-            'error': 'no template named {}'.format(template_name)
-        })
+        return std_response(
+            status=STATUS_CLIENT_ERROR,
+            msg='no template named {}'.format(template_name),
+            request=request.form,
+            response='',
+        )
 
     # optional
     extra_dict = json.loads(request.form.get('extras'))
@@ -40,7 +61,7 @@ def analyse():
     temp_pic_file_object.close()
 
     # init findit
-    fi = FindIt(**new_extra_dict)
+    fi = FindIt(need_log=True, **new_extra_dict)
     fi.load_template(template_path, pic_path=template_path)
     _response = fi.find(
         config.DEFAULT_TARGET_NAME,
@@ -51,7 +72,9 @@ def analyse():
     # clean
     os.remove(temp_pic_file_object.name)
 
-    return jsonify({
-        'request': request,
-        'response': _response,
-    })
+    return std_response(
+        status=STATUS_OK,
+        msg='',
+        request=request.form,
+        response=_response,
+    )
