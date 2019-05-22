@@ -7,7 +7,7 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir findit==0.4.3
+RUN pip install --no-cache-dir findit==0.4.4
 
 EXPOSE 9410
 
