@@ -18,7 +18,7 @@ STATUS_SERVER_ERROR = 'SERVER_ERROR'
 
 def std_response(**kwargs):
     _response = _FindItResponse(**kwargs)
-    return jsonify(_response)
+    return jsonify(_response._asdict())
 
 
 # init server
