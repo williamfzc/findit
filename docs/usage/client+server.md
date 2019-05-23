@@ -38,12 +38,12 @@ docker-compose up -d
 
 简而言之，你可以在文件管理器上直接管理你的资源，并让它被findit使用。文件管理器来自 [filebrowser](https://github.com/filebrowser/filebrowser)。
 
-## 客户端配置
+## 客户端
 
-目前我们提供了python版本的client，其他语言待开发，如果有兴趣的话欢迎加入！
+目前我们实现了python与java的client，可方便地嵌入现有框架，为框架带来图像识别能力。
 
-- [python2/3](https://github.com/williamfzc/findit-client)
-- java
+- [Python2/3](https://github.com/williamfzc/findit-client)
+- [Java](https://github.com/williamfzc/findit-java-client)
 - ...
 
 ## 一个完整例子
