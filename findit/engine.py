@@ -71,6 +71,10 @@ class TemplateEngine(FindItEngine):
         return {
             'target_point': max_loc,
             'target_sim': max_val,
+            'conf': {
+                'engine_template_cv_method_name': self.cv_method_name,
+                'engine_template_scale': self.scale,
+            },
             'raw': {
                 'min_val': min_val,
                 'max_val': max_val,
@@ -169,6 +173,10 @@ class FeatureEngine(FindItEngine):
         return {
             'target_point': readable_center_point,
             'raw': readable_point_list,
+            'conf': {
+                'engine_feature_cluster_num': self.cluster_num,
+                'engine_feature_distance_threshold': self.distance_threshold,
+            },
         }
 
     def get_feature_point_list(self,
