@@ -25,6 +25,6 @@ services:
     image: williamfzc/findit
     restart: always
     volumes:
-      - ~/findit_server_workspace/pic_home/srv:/root/pics
+      - ~/findit_server_workspace/pic_home/srv:/root/pics:ro
     ports:
       - "29412:9410"
