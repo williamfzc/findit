@@ -62,7 +62,7 @@ def analyse():
 
     # init findit
     fi = FindIt(need_log=True, **new_extra_dict)
-    fi.load_template(template_path, pic_path=template_path)
+    fi.load_template(template_name, pic_path=template_path)
     _response = fi.find(
         config.DEFAULT_TARGET_NAME,
         target_pic_path=temp_pic_file_object.name,
