@@ -23,29 +23,31 @@ class TemplateEngine(FindItEngine):
         (https://stackoverflow.com/questions/35658323/python-opencv-matchtemplate-is-mask-feature-implemented)
     2. Personally I do not want to use SQDIFF series. Its max value is totally different from what we thought.
     """
-    DEFAULT_CV_METHOD_NAME = 'cv2.TM_CCORR_NORMED'
-    DEFAULT_SCALE = (1, 3, 10)
+    DEFAULT_CV_METHOD_NAME: str = 'cv2.TM_CCORR_NORMED'
+    DEFAULT_SCALE: typing.Sequence = (1, 3, 10)
+    DEFAULT_MULTI_TARGET_MODE: bool = True
 
     def __init__(self,
                  engine_template_cv_method_name: str = None,
                  engine_template_scale: typing.Sequence = None,
+                 engine_template_multi_target_mode: bool = None,
                  *_, **__):
+        """ eg: engine_template_cv_method_name -> cv_method_name """
         logger.info('engine {} preparing ...'.format(self.get_type()))
 
         # cv
-        if not engine_template_cv_method_name:
-            engine_template_cv_method_name = self.DEFAULT_CV_METHOD_NAME
-        self.cv_method_name = engine_template_cv_method_name
-        self.cv_method_code = eval(engine_template_cv_method_name)
+        self.cv_method_name = engine_template_cv_method_name or self.DEFAULT_CV_METHOD_NAME
+        self.cv_method_code = eval(self.cv_method_name)
 
         # scale
-        if not engine_template_scale:
-            # default scale
-            engine_template_scale = self.DEFAULT_SCALE
-        self.scale = engine_template_scale
+        self.scale = engine_template_scale or self.DEFAULT_SCALE
+
+        # multi target mode
+        self.multi_target_mode = engine_template_multi_target_mode or self.DEFAULT_MULTI_TARGET_MODE
 
         logger.debug('cv method: {}'.format(self.cv_method_name))
-        logger.debug('scale: {}'.format(engine_template_scale))
+        logger.debug('scale: {}'.format(self.scale))
+        logger.debug('multi target mode: {}'.format(self.multi_target_mode))
         logger.info('engine {} loaded'.format(self.get_type()))
 
     def execute(self,
@@ -135,8 +137,8 @@ class TemplateEngine(FindItEngine):
 
 class FeatureEngine(FindItEngine):
     # TODO need many sample pictures to test
-    DEFAULT_CLUSTER_NUM = 3
-    DEFAULT_DISTANCE_THRESHOLD = 0.75
+    DEFAULT_CLUSTER_NUM: int = 3
+    DEFAULT_DISTANCE_THRESHOLD: float = 0.75
 
     def __init__(self,
                  engine_feature_cluster_num: int = None,
@@ -145,9 +147,9 @@ class FeatureEngine(FindItEngine):
         logger.info('engine {} preparing ...'.format(self.get_type()))
 
         # for kmeans calculation
-        self.cluster_num = engine_feature_cluster_num or self.DEFAULT_CLUSTER_NUM
+        self.cluster_num: int = engine_feature_cluster_num or self.DEFAULT_CLUSTER_NUM
         # for feature matching
-        self.distance_threshold = engine_feature_distance_threshold or self.DEFAULT_DISTANCE_THRESHOLD
+        self.distance_threshold: float = engine_feature_distance_threshold or self.DEFAULT_DISTANCE_THRESHOLD
 
         logger.debug('cluster num: {}'.format(self.cluster_num))
         logger.debug('distance threshold: {}'.format(self.distance_threshold))
@@ -158,7 +160,7 @@ class FeatureEngine(FindItEngine):
                 target_object: np.ndarray,
                 *_, **__) -> dict:
         point_list = self.get_feature_point_list(template_object, target_object)
-        
+
         # no point found
         if not point_list:
             return {
