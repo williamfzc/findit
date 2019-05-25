@@ -25,12 +25,12 @@ class TemplateEngine(FindItEngine):
     """
     DEFAULT_CV_METHOD_NAME: str = 'cv2.TM_CCORR_NORMED'
     DEFAULT_SCALE: typing.Sequence = (1, 3, 10)
-    DEFAULT_MULTI_TARGET_MODE: bool = True
+    DEFAULT_MULTI_TARGET_MIN_THRESH: float = 0.999
 
     def __init__(self,
                  engine_template_cv_method_name: str = None,
                  engine_template_scale: typing.Sequence = None,
-                 engine_template_multi_target_mode: bool = None,
+                 engine_template_multi_target_min_thresh: float = None,
                  *_, **__):
         """ eg: engine_template_cv_method_name -> cv_method_name """
         logger.info('engine {} preparing ...'.format(self.get_type()))
@@ -42,12 +42,12 @@ class TemplateEngine(FindItEngine):
         # scale
         self.scale = engine_template_scale or self.DEFAULT_SCALE
 
-        # multi target mode
-        self.multi_target_mode = engine_template_multi_target_mode or self.DEFAULT_MULTI_TARGET_MODE
+        # multi target min thresh ( min_val * min_thresh )
+        self.multi_target_min_thresh = engine_template_multi_target_min_thresh or self.DEFAULT_MULTI_TARGET_MIN_THRESH
 
         logger.debug('cv method: {}'.format(self.cv_method_name))
         logger.debug('scale: {}'.format(self.scale))
-        logger.debug('multi target mode: {}'.format(self.multi_target_mode))
+        logger.debug('multi target mode: {}'.format(self.multi_target_min_thresh))
         logger.info('engine {} loaded'.format(self.get_type()))
 
     def execute(self,
@@ -62,12 +62,20 @@ class TemplateEngine(FindItEngine):
             mask_pic_object = toolbox.pre_pic(mask_pic_path, mask_pic_object)
 
         # template matching
-        min_val, max_val, min_loc, max_loc = self._compare_template(
+        min_val, max_val, min_loc, max_loc, res = self._compare_template(
             template_object,
             target_object,
             self.scale,
             mask_pic_object
         )
+
+        # multi target
+        min_thresh = (max_val - 1e-6) * self.multi_target_min_thresh
+        match_locations = np.where(res >= min_thresh)
+        point_list = zip(match_locations[1], match_locations[0])
+        # convert int32 to int
+        point_list = [list(map(int, _)) for _ in point_list]
+        # TODO filter for points which are too close to each other
 
         # 'target_point' must existed
         return {
@@ -76,12 +84,14 @@ class TemplateEngine(FindItEngine):
             'conf': {
                 'engine_template_cv_method_name': self.cv_method_name,
                 'engine_template_scale': self.scale,
+                'engine_template_multi_target_min_thresh': self.multi_target_min_thresh,
             },
             'raw': {
                 'min_val': min_val,
                 'max_val': max_val,
                 'min_loc': min_loc,
                 'max_loc': max_loc,
+                'all': point_list,
             }
         }
 
@@ -122,17 +132,17 @@ class TemplateEngine(FindItEngine):
                 resize_template_pic_object,
                 self.cv_method_code,
                 mask=resize_mask_pic_object)
-            current_result = [cv2.minMaxLoc(res), resize_template_pic_object.shape]
+            current_result = [cv2.minMaxLoc(res), resize_template_pic_object.shape, res]
             result_list.append(current_result)
 
         logger.debug('scale search result: {}'.format(result_list))
         # get the best one
-        loc_val, shape = sorted(result_list, key=lambda i: i[0][1])[-1]
+        loc_val, shape, res = sorted(result_list, key=lambda i: i[0][1])[-1]
         min_val, max_val, min_loc, max_loc = loc_val
         logger.debug('raw compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
         min_loc, max_loc = map(lambda each_location: toolbox.fix_location(shape, each_location), [min_loc, max_loc])
         logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
-        return min_val, max_val, min_loc, max_loc
+        return min_val, max_val, min_loc, max_loc, res
 
 
 class FeatureEngine(FindItEngine):
