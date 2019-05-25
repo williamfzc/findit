@@ -8,13 +8,15 @@ from findit_client import FindItStandardClient
 
 # globals
 PORT = random.randint(9409, 11000)
-find_it_client = FindItStandardClient(port=PORT)
+find_it_client = None
 
 
 @pytest.fixture(scope="session", autouse=True)
 def life_time():
     server_process = subprocess.Popen('python -m findit.server --dir sample/pics --port {}'.format(PORT), shell=True)
     time.sleep(3)
+    global find_it_client
+    find_it_client = FindItStandardClient(port=PORT)
     yield
     server_process.terminate()
     server_process.kill()
