@@ -25,7 +25,7 @@ class TemplateEngine(FindItEngine):
     """
     DEFAULT_CV_METHOD_NAME: str = 'cv2.TM_CCORR_NORMED'
     DEFAULT_SCALE: typing.Sequence = (1, 3, 10)
-    DEFAULT_MULTI_TARGET_MIN_THRESH: float = 0.999
+    DEFAULT_MULTI_TARGET_MIN_THRESH: float = 0.99
 
     def __init__(self,
                  engine_template_cv_method_name: str = None,
@@ -135,6 +135,7 @@ class TemplateEngine(FindItEngine):
         # fix position
         logger.debug('raw compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
         min_loc, max_loc = map(lambda each_location: list(toolbox.fix_location(shape, each_location)), [min_loc, max_loc])
+        point_list = [list(toolbox.fix_location(shape, each) for each in point_list)]
         logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
 
         return min_val, max_val, min_loc, max_loc, point_list
