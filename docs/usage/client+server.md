@@ -20,9 +20,9 @@ findit的最佳实践是配置在服务器上，以服务的形式满足不同�
 
 服务端需求 python3.6+，**强烈推荐**用 docker 与 docker-compose 部署。
 
-### docker
+### 用 docker 部署
 
-完整服务包括三个部分：
+docker模式提供了一整套完整服务，非常适合部署在远程服务器。包括三个部分：
 
 - 文件管理UI（端口29410）
 - nginx文件服务器（端口29411）
@@ -40,11 +40,18 @@ docker-compose up -d
 
 简而言之，你可以在文件管理器上直接管理你的资源，并让它被findit使用。文件管理器来自 [filebrowser](https://github.com/filebrowser/filebrowser)。
 
-### 常规方式（命令行）
+### 用 命令行 部署
 
-直接用命令行 `python -m findit.server --dir YOUR_PICTURE_DIR --port YOUR_PORT`
+当然，如果你不想使用docker，你也可以直接用命令行启动 findit-server。
+
+```bash
+pip install findit
+python -m findit.server --dir YOUR_PICTURE_DIR --port YOUR_PORT
+```
 
 - `YOUR_PICTURE_DIR` 换成你的图片库根目录
+    - 如 `--dir ~/my_picture_dir`
+    - 之后当 findit-server 需要图片时，会根据你传入的相对路径以这个目录为准开始查找
 - `YOUR_PORT` 服务端口，默认9410
 
 ## 客户端
