@@ -62,20 +62,12 @@ class TemplateEngine(FindItEngine):
             mask_pic_object = toolbox.pre_pic(mask_pic_path, mask_pic_object)
 
         # template matching
-        min_val, max_val, min_loc, max_loc, res = self._compare_template(
+        min_val, max_val, min_loc, max_loc, point_list = self._compare_template(
             template_object,
             target_object,
             self.scale,
             mask_pic_object
         )
-
-        # multi target
-        min_thresh = (max_val - 1e-6) * self.multi_target_min_thresh
-        match_locations = np.where(res >= min_thresh)
-        point_list = zip(match_locations[1], match_locations[0])
-        # convert int32 to int
-        point_list = [list(map(int, _)) for _ in point_list]
-        # TODO filter for points which are too close to each other
 
         # 'target_point' must existed
         return {
@@ -99,7 +91,7 @@ class TemplateEngine(FindItEngine):
                           template_pic_object: np.ndarray,
                           target_pic_object: np.ndarray,
                           scale: typing.Sequence,
-                          mask_pic_object: np.ndarray = None) -> typing.Sequence[float]:
+                          mask_pic_object: np.ndarray = None) -> typing.Sequence:
         """
         compare via template matching
         (https://www.pyimagesearch.com/2015/01/26/multi-scale-template-matching-using-python-opencv/)
@@ -119,9 +111,7 @@ class TemplateEngine(FindItEngine):
 
             # resize mask
             if mask_pic_object is not None:
-                resize_mask_pic_object = toolbox.resize_pic_scale(mask_pic_object, each_scale)
-            else:
-                resize_mask_pic_object = None
+                mask_pic_object = toolbox.resize_pic_scale(mask_pic_object, each_scale)
 
             # if template's size is larger than raw picture, break
             if resize_template_pic_object.shape[0] > pic_height or resize_template_pic_object.shape[1] > pic_width:
@@ -131,18 +121,37 @@ class TemplateEngine(FindItEngine):
                 target_pic_object,
                 resize_template_pic_object,
                 self.cv_method_code,
-                mask=resize_mask_pic_object)
-            current_result = [cv2.minMaxLoc(res), resize_template_pic_object.shape, res]
+                mask=mask_pic_object)
+            # each of current result is:
+            # [(min_val, max_val, min_loc, max_loc), point_list, shape]
+            current_result = [*self._parse_res(res), resize_template_pic_object.shape]
             result_list.append(current_result)
 
         logger.debug('scale search result: {}'.format(result_list))
         # get the best one
-        loc_val, shape, res = sorted(result_list, key=lambda i: i[0][1])[-1]
+        loc_val, point_list, shape = sorted(result_list, key=lambda i: i[0][1])[-1]
         min_val, max_val, min_loc, max_loc = loc_val
+
+        # fix position
         logger.debug('raw compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
         min_loc, max_loc = map(lambda each_location: toolbox.fix_location(shape, each_location), [min_loc, max_loc])
         logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
-        return min_val, max_val, min_loc, max_loc, res
+
+        return min_val, max_val, min_loc, max_loc, point_list
+
+    def _parse_res(self, res: np.ndarray) -> typing.Sequence:
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+
+        # multi target
+        min_thresh = (max_val - 1e-6) * self.multi_target_min_thresh
+        match_locations = np.where(res >= min_thresh)
+        point_list = zip(match_locations[1], match_locations[0])
+
+        # convert int32 to int
+        point_list = [list(map(int, _)) for _ in point_list]
+        # TODO filter for points which are too close to each other
+
+        return (min_val, max_val, min_loc, max_loc), point_list
 
 
 class FeatureEngine(FindItEngine):
