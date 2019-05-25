@@ -134,7 +134,7 @@ class TemplateEngine(FindItEngine):
 
         # fix position
         logger.debug('raw compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
-        min_loc, max_loc = map(lambda each_location: toolbox.fix_location(shape, each_location), [min_loc, max_loc])
+        min_loc, max_loc = map(lambda each_location: list(toolbox.fix_location(shape, each_location)), [min_loc, max_loc])
         logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
 
         return min_val, max_val, min_loc, max_loc, point_list
@@ -189,8 +189,9 @@ class FeatureEngine(FindItEngine):
 
         center_point = self.calculate_center_point(point_list)
 
-        readable_point_list = [each.to_tuple() for each in point_list]
-        readable_center_point = center_point.to_tuple()
+        readable_center_point = list(center_point)
+        readable_point_list = [list(each) for each in point_list]
+
         return {
             'target_point': readable_center_point,
             'raw': readable_point_list,
@@ -240,7 +241,7 @@ class FeatureEngine(FindItEngine):
         return point_list
 
     def calculate_center_point(self, point_list: typing.Sequence[Point]) -> Point:
-        np_point_list = np.array([_.to_tuple() for _ in point_list])
+        np_point_list = np.array(point_list)
         point_num = len(np_point_list)
 
         # if match points' count is less than clusters

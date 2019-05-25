@@ -7,15 +7,9 @@ import datetime
 import tempfile
 import contextlib
 import os
+from collections import namedtuple
 
-
-class Point(object):
-    def __init__(self, x: float, y: float):
-        self.x = x
-        self.y = y
-
-    def to_tuple(self) -> tuple:
-        return self.x, self.y
+Point = namedtuple('Point', ('x', 'y'))
 
 
 def load_grey_from_path(pic_path: str) -> np.ndarray:
