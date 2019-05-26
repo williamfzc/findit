@@ -8,6 +8,7 @@ import tempfile
 import contextlib
 import os
 from collections import namedtuple
+from scipy.spatial.distance import euclidean
 
 Point = namedtuple('Point', ('x', 'y'))
 
@@ -74,3 +75,18 @@ def cv2file(pic_object: np.ndarray) -> str:
     temp_pic_file_object_path = temp_pic_file_object.name
     yield temp_pic_file_object_path
     os.remove(temp_pic_file_object_path)
+
+
+def point_list_filter(point_list: typing.Sequence, distance: float) -> typing.Sequence:
+    """ remove some points which are too close """
+    point_list = sorted(list(set(point_list)), key=lambda o: o[0])
+    new_point_list = [point_list[0], ]
+    for cur_point in point_list[1:]:
+        for each_confirmed_point in new_point_list:
+            cur_distance = euclidean(cur_point, each_confirmed_point)
+            # existed
+            if cur_distance < distance:
+                break
+        else:
+            new_point_list.append(cur_point)
+    return new_point_list

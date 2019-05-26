@@ -10,6 +10,7 @@ install_requirement_list = [
     'scikit-learn',
     'flask',
     'gevent',
+    'scipy',
 ]
 
 setup(

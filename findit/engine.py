@@ -25,12 +25,14 @@ class TemplateEngine(FindItEngine):
     """
     DEFAULT_CV_METHOD_NAME: str = 'cv2.TM_CCORR_NORMED'
     DEFAULT_SCALE: typing.Sequence = (1, 3, 10)
-    DEFAULT_MULTI_TARGET_MIN_THRESH: float = 0.99
+    DEFAULT_MULTI_TARGET_MAX_THRESHOLD: float = 0.99
+    DEFAULT_MULTI_TARGET_DISTANCE_THRESHOLD: float = 10.0
 
     def __init__(self,
                  engine_template_cv_method_name: str = None,
                  engine_template_scale: typing.Sequence = None,
-                 engine_template_multi_target_min_thresh: float = None,
+                 engine_template_multi_target_max_threshold: float = None,
+                 engine_template_multi_target_distance_threshold: float = None,
                  *_, **__):
         """ eg: engine_template_cv_method_name -> cv_method_name """
         logger.info('engine {} preparing ...'.format(self.get_type()))
@@ -42,13 +44,15 @@ class TemplateEngine(FindItEngine):
         # scale
         self.scale = engine_template_scale or self.DEFAULT_SCALE
 
-        # multi target min thresh ( min_val * min_thresh )
-        self.multi_target_min_thresh = engine_template_multi_target_min_thresh or self.DEFAULT_MULTI_TARGET_MIN_THRESH
+        # multi target max threshold ( max_val * max_threshold == real threshold )
+        self.multi_target_max_threshold = engine_template_multi_target_max_threshold or self.DEFAULT_MULTI_TARGET_MAX_THRESHOLD
+        self.multi_target_distance_threshold = engine_template_multi_target_distance_threshold or self.DEFAULT_MULTI_TARGET_DISTANCE_THRESHOLD
 
-        logger.debug('cv method: {}'.format(self.cv_method_name))
-        logger.debug('scale: {}'.format(self.scale))
-        logger.debug('multi target mode: {}'.format(self.multi_target_min_thresh))
-        logger.info('engine {} loaded'.format(self.get_type()))
+        logger.debug(f'cv method: {self.cv_method_name}')
+        logger.debug(f'scale: {self.scale}')
+        logger.debug(f'multi target max threshold: {self.multi_target_max_threshold}')
+        logger.debug(f'multi target distance threshold: {self.multi_target_distance_threshold}')
+        logger.info(f'engine {self.get_type()} loaded')
 
     def execute(self,
                 template_object: np.ndarray,
@@ -76,7 +80,8 @@ class TemplateEngine(FindItEngine):
             'conf': {
                 'engine_template_cv_method_name': self.cv_method_name,
                 'engine_template_scale': self.scale,
-                'engine_template_multi_target_min_thresh': self.multi_target_min_thresh,
+                'engine_template_multi_target_max_threshold': self.multi_target_max_threshold,
+                'engine_template_multi_target_distance_threshold': self.multi_target_distance_threshold
             },
             'raw': {
                 'min_val': min_val,
@@ -124,6 +129,8 @@ class TemplateEngine(FindItEngine):
                 mask=mask_pic_object)
             # each of current result is:
             # [(min_val, max_val, min_loc, max_loc), point_list, shape]
+
+            # TODO calculating distance takes some time here
             current_result = [*self._parse_res(res), resize_template_pic_object.shape]
             result_list.append(current_result)
 
@@ -134,8 +141,9 @@ class TemplateEngine(FindItEngine):
 
         # fix position
         logger.debug('raw compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
-        min_loc, max_loc = map(lambda each_location: list(toolbox.fix_location(shape, each_location)), [min_loc, max_loc])
-        point_list = [list(toolbox.fix_location(shape, each) for each in point_list)]
+        min_loc, max_loc = map(lambda each_location: list(toolbox.fix_location(shape, each_location)),
+                               [min_loc, max_loc])
+        point_list = [list(toolbox.fix_location(shape, each)) for each in point_list]
         logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
 
         return min_val, max_val, min_loc, max_loc, point_list
@@ -144,13 +152,13 @@ class TemplateEngine(FindItEngine):
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
         # multi target
-        min_thresh = (max_val - 1e-6) * self.multi_target_min_thresh
+        min_thresh = (max_val - 1e-6) * self.multi_target_max_threshold
         match_locations = np.where(res >= min_thresh)
         point_list = zip(match_locations[1], match_locations[0])
 
-        # convert int32 to int
-        point_list = [list(map(int, _)) for _ in point_list]
-        # TODO filter for points which are too close to each other
+        # convert int32 to float
+        point_list = [tuple(map(float, _)) for _ in point_list]
+        point_list = toolbox.point_list_filter(point_list, self.multi_target_distance_threshold)
 
         return (min_val, max_val, min_loc, max_loc), point_list
 
