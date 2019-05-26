@@ -235,11 +235,14 @@ class FeatureEngine(FindItEngine):
         # cv2.imshow('feature_points', temp)
         # cv2.waitKey(0)
 
-        # Apply ratio test
         good = []
-        for m, n in matches:
-            if m.distance < self.distance_threshold * n.distance:
-                good.append([m])
+        if len(matches) == 1:
+            good = [matches[0]]
+        else:
+            for m, n in matches:
+                if m.distance < self.distance_threshold * n.distance:
+                    good.append([m])
+
         point_list = list()
         for each in good:
             img2_idx = each[0].trainIdx
