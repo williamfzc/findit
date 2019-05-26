@@ -130,7 +130,6 @@ class TemplateEngine(FindItEngine):
             # each of current result is:
             # [(min_val, max_val, min_loc, max_loc), point_list, shape]
 
-            # TODO calculating distance takes some time here
             current_result = [*self._parse_res(res), resize_template_pic_object.shape]
             result_list.append(current_result)
 
@@ -143,7 +142,8 @@ class TemplateEngine(FindItEngine):
         logger.debug('raw compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
         min_loc, max_loc = map(lambda each_location: list(toolbox.fix_location(shape, each_location)),
                                [min_loc, max_loc])
-        point_list = [list(toolbox.fix_location(shape, each)) for each in point_list]
+        point_list = [list(toolbox.fix_location(shape, each))
+                      for each in toolbox.point_list_filter(point_list, self.multi_target_distance_threshold)]
         logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
 
         return min_val, max_val, min_loc, max_loc, point_list
@@ -158,7 +158,6 @@ class TemplateEngine(FindItEngine):
 
         # convert int32 to float
         point_list = [tuple(map(float, _)) for _ in point_list]
-        point_list = toolbox.point_list_filter(point_list, self.multi_target_distance_threshold)
 
         return (min_val, max_val, min_loc, max_loc), point_list
 
