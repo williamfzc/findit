@@ -125,9 +125,8 @@ class FindIt(object):
                     cv2.imwrite(mark_pic_path, target_pic_object_with_mark)
                     logger.debug('save marked picture to {}'.format(mark_pic_path))
 
-                # if not in pro mode,
-                if not self.pro_mode:
-                    each_result = each_result['target_point']
+                # result filter
+                each_result = self._prune_result(each_result)
 
                 current_result[each_engine.get_type()] = each_result
 
@@ -141,6 +140,18 @@ class FindIt(object):
         }
         logger.info('result: {}'.format(json.dumps(final_result)))
         return final_result
+
+    def _prune_result(self, result: dict):
+        if self.pro_mode:
+            return result
+
+        # keep only target_point and target_sim (if existed)
+        new_result = dict()
+        summary_key_list = ['target_sim', 'target_point']
+        for each_key in summary_key_list:
+            if each_key in result:
+                new_result[each_key] = result[each_key]
+        return new_result
 
     def clear(self):
         """ reset template, target and result """
