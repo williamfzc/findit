@@ -1,0 +1,9 @@
+opencv-python
+imutils
+numpy
+loguru
+opencv-contrib-python==3.4.2.17
+scikit-learn
+flask
+gevent
+scipy

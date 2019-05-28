@@ -2,15 +2,20 @@ FROM python:3-slim
 
 USER root
 
+WORKDIR /usr/src/app
+
+COPY ./requirements.txt .
+
 RUN apt-get update \
     && apt-get install -y libglib2.0 libsm6 libxrender1 libxext-dev \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install -r requirements.txt
 
-RUN pip install --no-cache-dir findit==0.4.6
+COPY . .
+
+RUN pip install .
 
 EXPOSE 9410
-
-WORKDIR /root/pics
 
 CMD ["python", "-m", "findit.server", "--dir", "/root/pics"]
