@@ -40,15 +40,23 @@ def hello():
 @app.route("/analyse", methods=['POST'])
 def analyse():
     # required
+    # support multi pictures, split with ','
     template_name = request.form.get('template_name')
-    template_path = utils.get_pic_path_by_name(template_name)
-    if not template_path:
-        return std_response(
-            status=STATUS_CLIENT_ERROR,
-            msg='no template named {}'.format(template_name),
-            request=request.form,
-            response='',
-        )
+    template_name_list = template_name.split(',')
+    template_dict = dict()
+
+    for each_template_name in template_name_list:
+        template_path = utils.get_pic_path_by_name(each_template_name)
+
+        # file not existed
+        if not template_path:
+            return std_response(
+                status=STATUS_CLIENT_ERROR,
+                msg='no template named {}'.format(each_template_name),
+                request=request.form,
+                response='',
+            )
+        template_dict[each_template_name] = template_path
 
     # optional
     extra_dict = json.loads(request.form.get('extras'))
@@ -62,7 +70,11 @@ def analyse():
 
     # init findit
     fi = FindIt(need_log=True, **new_extra_dict)
-    fi.load_template(template_name, pic_path=template_path)
+
+    # load all templates
+    for each_template_name, each_template_path in template_dict.items():
+        fi.load_template(each_template_name, pic_path=each_template_path)
+
     _response = fi.find(
         config.DEFAULT_TARGET_NAME,
         target_pic_path=temp_pic_file_object.name,
