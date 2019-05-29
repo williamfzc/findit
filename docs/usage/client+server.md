@@ -56,11 +56,15 @@ python -m findit.server --dir YOUR_PICTURE_DIR --port YOUR_PORT
 
 ## 客户端
 
-目前我们实现了python与java的client，可方便地嵌入现有框架，为框架带来图像识别能力。
+目前我们优先支持python2/3，可方便地嵌入现有框架，为框架带来图像识别能力。比起findit本身，它：
 
-- [Python2/3](https://github.com/williamfzc/findit-client)
-- [Java](https://github.com/williamfzc/findit-java-client)
-- ...
+- 更为清晰且丰富的API，支持相同甚至更多的功能
+- 更加简单易用，无需自己进行数据处理
+- 依赖少，兼容性强
+- 灵活（client能够连接本地或远程的服务。如果你并不希望把server部署到远程，你可以非常方便地在本地启动服务器并接入它）
+- 与代码库分离的规范化图片管理
+
+请从这里 [Python2/3 项目](https://github.com/williamfzc/findit-client) 开始吧：）
 
 ## 一个完整例子
 
