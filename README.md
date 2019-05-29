@@ -13,14 +13,16 @@
 
 ---
 
-![cs_service](docs/pics/client+server.svg)
+![sample](docs/pics/feature_matching_sample.png)
 
-旨在提供：
+以**简单**的方式，为**不同平台**、**不同语言**提供可靠的图像识别（目标检测）服务。
 
-- 为你、你的团队、你的自动化系统
-- 规范化、安全、高效
-- 跨平台与多语言
-- 目标图片识别与图片管理服务
+它可以被用于：
+
+- app资源遍历
+- 页面状态检测
+- 全端自动化
+- ...
 
  从我们的 [官方文档](https://williamfzc.github.io/findit/) 开始吧！
 

@@ -15,14 +15,16 @@
 
 # 简介
 
-![cs_service](../pics/client+server.svg)
+![sample](../pics/feature_matching_sample.png)
 
-旨在提供：
+以**简单**的方式，为**不同平台**、**不同语言**提供可靠的图像识别（目标检测）服务。
 
-- 为你、你的团队、你的自动化系统
-- 规范化、安全、高效
-- 跨平台与多语言
-- 目标图片识别与图片管理服务
+它可以被用于：
+
+- app资源遍历
+- 页面状态检测
+- 全端自动化
+- ...
 
 # 工作形态
 
@@ -32,8 +34,6 @@ findit主要以两种形态出现：
 - [python包模式](usage/normal.md) 下，findit能够直接以常规第三方库的形式嵌入到你的工作框架中，为你的框架提供原生的图像识别能力。
 
 # 相关参考
-
-![](../pics/feature_matching_sample.png)
 
 findit 主要用到了 feature matching 与 template matching 。
 
