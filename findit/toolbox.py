@@ -15,6 +15,7 @@ Point = namedtuple('Point', ('x', 'y'))
 
 def load_grey_from_path(pic_path: str) -> np.ndarray:
     """ load grey picture (with cv2) from path """
+    assert os.path.isfile(pic_path), f'picture [{pic_path}] not existed'
     raw_img = cv2.imread(pic_path)
     return load_grey_from_cv2_object(raw_img)
 
