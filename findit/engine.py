@@ -133,7 +133,9 @@ class TemplateEngine(FindItEngine):
             current_result = [*self._parse_res(res), resize_template_pic_object.shape]
             result_list.append(current_result)
 
-        logger.debug('scale search result: {}'.format(result_list))
+        # too much log here, remove it.
+        # logger.debug('scale search result: {}'.format(result_list))
+
         # get the best one
         loc_val, point_list, shape = sorted(result_list, key=lambda i: i[0][1])[-1]
         min_val, max_val, min_loc, max_loc = loc_val
