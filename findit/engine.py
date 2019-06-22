@@ -70,20 +70,21 @@ class TemplateEngine(FindItEngine):
     def execute(self,
                 template_object: np.ndarray,
                 target_object: np.ndarray,
-                mask_pic_object: np.ndarray = None,
-                mask_pic_path: str = None,
+                engine_template_mask_pic_object: np.ndarray = None,
+                engine_template_mask_pic_path: str = None,
                 *_, **__) -> dict:
         # mask
-        if (mask_pic_path is not None) or (mask_pic_object is not None):
+        if (engine_template_mask_pic_path is not None) or (engine_template_mask_pic_object is not None):
             logger.info('mask detected')
-            mask_pic_object = toolbox.pre_pic(mask_pic_path, mask_pic_object)
+            engine_template_mask_pic_object = toolbox.pre_pic(engine_template_mask_pic_path,
+                                                              engine_template_mask_pic_object)
 
         # template matching
         min_val, max_val, min_loc, max_loc, point_list = self._compare_template(
             template_object,
             target_object,
             self.scale,
-            mask_pic_object
+            engine_template_mask_pic_object
         )
 
         # 'target_point' must existed
@@ -299,21 +300,33 @@ class OCREngine(FindItEngine):
     def execute(self,
                 template_object: np.ndarray,
                 target_object: np.ndarray,
-                lang: str = None,
+                engine_ocr_lang: str = None,
                 *_, **__) -> dict:
-        lang = lang or self.DEFAULT_LANGUAGE
-        logger.info(f'target language: {lang}')
+        engine_ocr_lang = engine_ocr_lang or self.DEFAULT_LANGUAGE
+        logger.info(f'target language: {engine_ocr_lang}')
 
         # check language
-        if lang not in self.available_lang_list:
-            return {}
+        if engine_ocr_lang not in self.available_lang_list:
+            return {
+                'conf': {
+                    'engine_ocr_lang': engine_ocr_lang,
+                    'engine_ocr_tess_data_dir': self.tess_data_dir,
+                    'engine_ocr_available_language_list': self.available_lang_list,
+                },
+                'raw': 'this language not available'
+            }
 
-        api = tesserocr.PyTessBaseAPI(lang=lang)
+        api = tesserocr.PyTessBaseAPI(lang=engine_ocr_lang)
         target_pil_object = Image.fromarray(target_object)
         api.SetImage(target_pil_object)
         result_text = api.GetUTF8Text()
         return {
-            'result': result_text
+            'conf': {
+                'engine_ocr_lang': engine_ocr_lang,
+                'engine_ocr_tess_data_dir': self.tess_data_dir,
+                'engine_ocr_available_language_list': self.available_lang_list,
+            },
+            'raw': result_text,
         }
 
 
