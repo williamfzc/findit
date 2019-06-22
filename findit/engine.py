@@ -202,7 +202,7 @@ class FeatureEngine(FindItEngine):
     # TODO need many sample pictures to test
     DEFAULT_CLUSTER_NUM: int = 3
     DEFAULT_DISTANCE_THRESHOLD: float = 0.75
-    DEFAULT_MIN_HESSIAN: int = 400
+    DEFAULT_MIN_HESSIAN: int = 200
 
     def __init__(self,
                  engine_feature_cluster_num: int = None,
@@ -262,34 +262,45 @@ class FeatureEngine(FindItEngine):
         surf = cv2.xfeatures2d.SURF_create(self.engine_feature_min_hessian)
 
         # find the keypoints and descriptors with SURF
-        kp1, des1 = surf.detectAndCompute(template_pic_object, None)
-        kp2, des2 = surf.detectAndCompute(target_pic_object, None)
+        template_kp, template_desc = surf.detectAndCompute(template_pic_object, None)
+        target_kp, target_desc = surf.detectAndCompute(target_pic_object, None)
 
         # key points count
-        logger.debug(f'template key point count: {len(kp1)}')
-        logger.debug(f'target key point count: {len(kp2)}')
+        logger.debug(f'template key point count: {len(template_kp)}')
+        logger.debug(f'target key point count: {len(target_kp)}')
 
-        # BFMatcher with default params
-        bf = cv2.BFMatcher()
-        matches = bf.knnMatch(des1, des2, k=2)
+        # find 2 points, which are the closest
+        # 找到帧和帧之间的一致性的过程就是在一个描述符集合（询问集）中找另一个集合（相当于训练集）的最近邻。 这里找到 每个描述符 的 最近邻与次近邻
+        # 一个正确的匹配会更接近第一个邻居。换句话说，一个不正确的匹配，两个邻居的距离是相似的。因此，我们可以通过查看二者距离的不同来评判距匹配程度的好坏。
+        # more details: https://blog.csdn.net/liangjiubujiu/article/details/80418079
+        flann = cv2.FlannBasedMatcher()
+        matches = flann.knnMatch(template_desc, target_desc, k=2)
+        # matches are something like:
+        # [[<DMatch 0x12400a350>, <DMatch 0x12400a430>], [<DMatch 0x124d6a170>, <DMatch 0x124d6a450>]]
+
+        logger.debug(f'matches num: {len(matches)}')
 
         # TODO here is a sample to show feature points
         # temp = cv2.drawMatchesKnn(template_pic_object, kp1, target_pic_object, kp2, matches, None, flags=2)
         # cv2.imshow('feature_points', temp)
         # cv2.waitKey(0)
 
+        # filter for invalid points
         good = []
+        # only one matches
         if len(matches) == 1:
-            good = [matches[0]]
+            good = matches[0]
+        # more than one matches
         else:
             for m, n in matches:
                 if m.distance < self.engine_feature_distance_threshold * n.distance:
-                    good.append([m])
+                    good.append(m)
 
+        # get positions
         point_list = list()
         for each in good:
-            img2_idx = each[0].trainIdx
-            each_point = Point(*kp2[img2_idx].pt)
+            target_idx = each.trainIdx
+            each_point = Point(*target_kp[target_idx].pt)
             point_list.append(each_point)
 
         return point_list
