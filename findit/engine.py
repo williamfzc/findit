@@ -2,12 +2,21 @@ import numpy as np
 import typing
 import cv2
 import collections
+import warnings
 # https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
 from sklearn.cluster import KMeans
 
 from findit.logger import logger
 from findit import toolbox
 from findit.toolbox import Point
+
+try:
+    import tesserocr
+
+    # tesserocr only supports PIL
+    from PIL import Image
+except ImportError:
+    warnings.warn('tesserocr should be installed if you want to use OCR engine')
 
 
 class FindItEngine(object):
@@ -16,6 +25,7 @@ class FindItEngine(object):
 
     def execute(self, *_, **__):
         """ MUST BE IMPLEMENTED """
+        raise NotImplementedError("this function must be implemented")
 
 
 class TemplateEngine(FindItEngine):
@@ -274,7 +284,41 @@ class FeatureEngine(FindItEngine):
         return Point(*k_means.cluster_centers_[mode_label_index])
 
 
+class OCREngine(FindItEngine):
+    """ OCR engine, binding to tesseract """
+    DEFAULT_LANGUAGE = 'eng'
+
+    def __init__(self, *_, **__):
+        self.tess_data_dir, self.available_lang_list = tesserocr.get_languages()
+        logger.debug(f'tess data dir: {self.tess_data_dir}')
+        logger.debug(f'available language: {self.available_lang_list}')
+        logger.info(f'engine {self.get_type()} loaded')
+
+        # check language data before execute function, not here.
+
+    def execute(self,
+                template_object: np.ndarray,
+                target_object: np.ndarray,
+                lang: str = None,
+                *_, **__) -> dict:
+        lang = lang or self.DEFAULT_LANGUAGE
+        logger.info(f'target language: {lang}')
+
+        # check language
+        if lang not in self.available_lang_list:
+            return {}
+
+        api = tesserocr.PyTessBaseAPI(lang=lang)
+        target_pil_object = Image.fromarray(target_object)
+        api.SetImage(target_pil_object)
+        result_text = api.GetUTF8Text()
+        return {
+            'result': result_text
+        }
+
+
 engine_dict = {
     'feature': FeatureEngine,
     'template': TemplateEngine,
+    'ocr': OCREngine,
 }
