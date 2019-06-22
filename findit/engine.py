@@ -202,10 +202,12 @@ class FeatureEngine(FindItEngine):
     # TODO need many sample pictures to test
     DEFAULT_CLUSTER_NUM: int = 3
     DEFAULT_DISTANCE_THRESHOLD: float = 0.75
+    DEFAULT_MIN_HESSIAN: int = 400
 
     def __init__(self,
                  engine_feature_cluster_num: int = None,
                  engine_feature_distance_threshold: float = None,
+                 engine_feature_min_hessian: int = None,
                  *_, **__):
         logger.info('engine {} preparing ...'.format(self.get_type()))
 
@@ -213,9 +215,13 @@ class FeatureEngine(FindItEngine):
         self.engine_feature_cluster_num: int = engine_feature_cluster_num or self.DEFAULT_CLUSTER_NUM
         # for feature matching
         self.engine_feature_distance_threshold: float = engine_feature_distance_threshold or self.DEFAULT_DISTANCE_THRESHOLD
+        # for determining if a point is a feature point
+        # higher threshold, less points
+        self.engine_feature_min_hessian: int = engine_feature_min_hessian or self.DEFAULT_MIN_HESSIAN
 
         logger.debug('cluster num: {}'.format(self.engine_feature_cluster_num))
         logger.debug('distance threshold: {}'.format(self.engine_feature_distance_threshold))
+        logger.debug('hessian threshold: {}'.format(self.engine_feature_min_hessian))
         logger.info('engine {} loaded'.format(self.get_type()))
 
     def execute(self,
@@ -229,7 +235,7 @@ class FeatureEngine(FindItEngine):
 
         # no point found
         if not point_list:
-            resp.append('target_point', (-1, -1))
+            resp.append('target_point', (-1, -1), important=True)
             resp.append('raw', 'not found')
             return resp
 
@@ -253,11 +259,15 @@ class FeatureEngine(FindItEngine):
         :return:
         """
         # Initiate SURF detector
-        surf = cv2.xfeatures2d.SURF_create()
+        surf = cv2.xfeatures2d.SURF_create(self.engine_feature_min_hessian)
 
         # find the keypoints and descriptors with SURF
         kp1, des1 = surf.detectAndCompute(template_pic_object, None)
         kp2, des2 = surf.detectAndCompute(target_pic_object, None)
+
+        # key points count
+        logger.debug(f'template key point count: {len(kp1)}')
+        logger.debug(f'target key point count: {len(kp2)}')
 
         # BFMatcher with default params
         bf = cv2.BFMatcher()
