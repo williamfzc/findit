@@ -35,6 +35,7 @@ class FindIt(object):
         if not engine:
             # default
             engine = ['template', 'feature']
+        self.engine_name_list = engine
         self.engine_list = None
         self.set_engine(engine, *args, **kwargs)
 
@@ -93,6 +94,12 @@ class FindIt(object):
         :param mark_pic: enable this, and you will get a picture file with a mark of result
         :return:
         """
+        # TODO not a good way I think
+        # if only ocr engine enabled
+        if self.engine_name_list == ['ocr']:
+            self.template = {
+                target_pic_name: None
+            }
 
         # pre assert
         assert self.template, 'template is empty'
