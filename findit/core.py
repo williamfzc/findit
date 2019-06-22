@@ -6,7 +6,7 @@ import json
 
 from findit.logger import logger, LOGGER_FLAG
 from findit import toolbox
-from findit.engine import engine_dict
+from findit.engine import engine_dict, FindItEngineResponse
 
 
 class FindIt(object):
@@ -111,7 +111,7 @@ class FindIt(object):
             for each_engine in self.engine_list:
                 each_result = each_engine.execute(each_template_object, target_pic_object, *args, **kwargs)
 
-                # need mark?
+                # for debug ONLY!
                 if mark_pic:
                     target_pic_object_with_mark = toolbox.mark_point(
                         target_pic_object,
@@ -141,17 +141,10 @@ class FindIt(object):
         logger.info('result: {}'.format(json.dumps(final_result)))
         return final_result
 
-    def _prune_result(self, result: dict):
+    def _prune_result(self, response: FindItEngineResponse) -> dict:
         if self.pro_mode:
-            return result
-
-        # keep only target_point and target_sim (if existed)
-        new_result = dict()
-        summary_key_list = ['target_sim', 'target_point']
-        for each_key in summary_key_list:
-            if each_key in result:
-                new_result[each_key] = result[each_key]
-        return new_result
+            return response.get_content()
+        return response.get_brief()
 
     def clear(self):
         """ reset template, target and result """

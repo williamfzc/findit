@@ -19,11 +19,30 @@ except ImportError:
     warnings.warn('tesserocr should be installed if you want to use OCR engine')
 
 
+class FindItEngineResponse(object):
+    """ standard response for engine """
+
+    def __init__(self):
+        self._content = dict()
+        self._brief = dict()
+
+    def append(self, key, value, important: bool = None):
+        if important:
+            self._brief[key] = value
+        self._content[key] = value
+
+    def get_brief(self) -> dict:
+        return self._brief
+
+    def get_content(self) -> dict:
+        return self._content
+
+
 class FindItEngine(object):
     def get_type(self):
         return self.__class__.__name__
 
-    def execute(self, *_, **__):
+    def execute(self, *_, **__) -> FindItEngineResponse:
         """ MUST BE IMPLEMENTED """
         raise NotImplementedError("this function must be implemented")
 
@@ -72,7 +91,10 @@ class TemplateEngine(FindItEngine):
                 target_object: np.ndarray,
                 engine_template_mask_pic_object: np.ndarray = None,
                 engine_template_mask_pic_path: str = None,
-                *_, **__) -> dict:
+                *_, **__) -> FindItEngineResponse:
+        resp = FindItEngineResponse()
+        resp.append('conf', self.__dict__)
+
         # mask
         if (engine_template_mask_pic_path is not None) or (engine_template_mask_pic_object is not None):
             logger.info('mask detected')
@@ -88,23 +110,17 @@ class TemplateEngine(FindItEngine):
         )
 
         # 'target_point' must existed
-        return {
-            'target_point': max_loc,
-            'target_sim': max_val,
-            'conf': {
-                'engine_template_cv_method_name': self.engine_template_cv_method_name,
-                'engine_template_scale': self.engine_template_scale,
-                'engine_template_multi_target_max_threshold': self.engine_template_multi_target_max_threshold,
-                'engine_template_multi_target_distance_threshold': self.engine_template_multi_target_distance_threshold
-            },
-            'raw': {
-                'min_val': min_val,
-                'max_val': max_val,
-                'min_loc': min_loc,
-                'max_loc': max_loc,
-                'all': point_list,
-            }
-        }
+        resp.append('target_point', max_loc, important=True)
+        resp.append('target_sim', max_val, important=True)
+        resp.append('raw', {
+            'min_val': min_val,
+            'max_val': max_val,
+            'min_loc': min_loc,
+            'max_loc': max_loc,
+            'all': point_list,
+        })
+
+        return resp
 
     def _compare_template(self,
                           template_pic_object: np.ndarray,
@@ -159,7 +175,8 @@ class TemplateEngine(FindItEngine):
         min_loc, max_loc = map(lambda each_location: list(toolbox.fix_location(shape, each_location)),
                                [min_loc, max_loc])
         point_list = [list(toolbox.fix_location(shape, each))
-                      for each in toolbox.point_list_filter(point_list, self.engine_template_multi_target_distance_threshold)]
+                      for each in
+                      toolbox.point_list_filter(point_list, self.engine_template_multi_target_distance_threshold)]
         # sort point list
         point_list.sort(key=lambda i: i[0])
 
@@ -204,29 +221,26 @@ class FeatureEngine(FindItEngine):
     def execute(self,
                 template_object: np.ndarray,
                 target_object: np.ndarray,
-                *_, **__) -> dict:
+                *_, **__) -> FindItEngineResponse:
+        resp = FindItEngineResponse()
+        resp.append('conf', self.__dict__)
+
         point_list = self.get_feature_point_list(template_object, target_object)
 
         # no point found
         if not point_list:
-            return {
-                'target_point': (-1, -1),
-                'raw': [],
-            }
+            resp.append('target_point', (-1, -1))
+            resp.append('raw', 'not found')
+            return resp
 
         center_point = self.calculate_center_point(point_list)
 
         readable_center_point = list(center_point)
         readable_point_list = [list(each) for each in point_list]
 
-        return {
-            'target_point': readable_center_point,
-            'raw': readable_point_list,
-            'conf': {
-                'engine_feature_cluster_num': self.engine_feature_cluster_num,
-                'engine_feature_distance_threshold': self.engine_feature_distance_threshold,
-            },
-        }
+        resp.append('target_point', readable_center_point, important=True)
+        resp.append('raw', readable_point_list)
+        return resp
 
     def get_feature_point_list(self,
                                template_pic_object: np.ndarray,
@@ -296,40 +310,32 @@ class OCREngine(FindItEngine):
 
         # check language data before execute function, not here.
         self.engine_ocr_lang = engine_ocr_lang or self.DEFAULT_LANGUAGE
-        self.tess_data_dir, self.available_lang_list = tesserocr.get_languages()
+        self.engine_ocr_tess_data_dir, self.engine_ocr_available_lang_list = tesserocr.get_languages()
 
         logger.debug(f'target lang: {self.engine_ocr_lang}')
-        logger.debug(f'tess data dir: {self.tess_data_dir}')
-        logger.debug(f'available language: {self.available_lang_list}')
+        logger.debug(f'tess data dir: {self.engine_ocr_tess_data_dir}')
+        logger.debug(f'available language: {self.engine_ocr_available_lang_list}')
         logger.info(f'engine {self.get_type()} loaded')
 
     def execute(self,
                 template_object: np.ndarray,
                 target_object: np.ndarray,
-                *_, **__) -> dict:
+                *_, **__) -> FindItEngineResponse:
+        resp = FindItEngineResponse()
+        resp.append('conf', self.__dict__, important=True)
+
         # check language
-        if self.engine_ocr_lang not in self.available_lang_list:
-            return {
-                'conf': {
-                    'engine_ocr_lang': self.engine_ocr_lang,
-                    'engine_ocr_tess_data_dir': self.tess_data_dir,
-                    'engine_ocr_available_language_list': self.available_lang_list,
-                },
-                'raw': 'this language not available'
-            }
+        if self.engine_ocr_lang not in self.engine_ocr_available_lang_list:
+            resp.append('raw', 'this language not available', important=True)
+            return resp
 
         api = tesserocr.PyTessBaseAPI(lang=self.engine_ocr_lang)
         target_pil_object = Image.fromarray(target_object)
         api.SetImage(target_pil_object)
         result_text = api.GetUTF8Text()
-        return {
-            'conf': {
-                'engine_ocr_lang': self.engine_ocr_lang,
-                'engine_ocr_tess_data_dir': self.tess_data_dir,
-                'engine_ocr_available_language_list': self.available_lang_list,
-            },
-            'raw': result_text,
-        }
+
+        resp.append('raw', result_text, important=True)
+        return resp
 
 
 engine_dict = {
