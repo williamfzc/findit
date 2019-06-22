@@ -14,6 +14,9 @@ class FindItEngine(object):
     def get_type(self):
         return self.__class__.__name__
 
+    def execute(self, *_, **__):
+        """ MUST BE IMPLEMENTED """
+
 
 class TemplateEngine(FindItEngine):
     """
@@ -146,6 +149,9 @@ class TemplateEngine(FindItEngine):
                                [min_loc, max_loc])
         point_list = [list(toolbox.fix_location(shape, each))
                       for each in toolbox.point_list_filter(point_list, self.multi_target_distance_threshold)]
+        # sort point list
+        point_list.sort(key=lambda i: i[0])
+
         logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
 
         return min_val, max_val, min_loc, max_loc, point_list
