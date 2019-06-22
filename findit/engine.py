@@ -51,20 +51,20 @@ class TemplateEngine(FindItEngine):
         logger.info('engine {} preparing ...'.format(self.get_type()))
 
         # cv
-        self.cv_method_name = engine_template_cv_method_name or self.DEFAULT_CV_METHOD_NAME
-        self.cv_method_code = eval(self.cv_method_name)
+        self.engine_template_cv_method_name = engine_template_cv_method_name or self.DEFAULT_CV_METHOD_NAME
+        self.engine_template_cv_method_code = eval(self.engine_template_cv_method_name)
 
         # scale
-        self.scale = engine_template_scale or self.DEFAULT_SCALE
+        self.engine_template_scale = engine_template_scale or self.DEFAULT_SCALE
 
         # multi target max threshold ( max_val * max_threshold == real threshold )
-        self.multi_target_max_threshold = engine_template_multi_target_max_threshold or self.DEFAULT_MULTI_TARGET_MAX_THRESHOLD
-        self.multi_target_distance_threshold = engine_template_multi_target_distance_threshold or self.DEFAULT_MULTI_TARGET_DISTANCE_THRESHOLD
+        self.engine_template_multi_target_max_threshold = engine_template_multi_target_max_threshold or self.DEFAULT_MULTI_TARGET_MAX_THRESHOLD
+        self.engine_template_multi_target_distance_threshold = engine_template_multi_target_distance_threshold or self.DEFAULT_MULTI_TARGET_DISTANCE_THRESHOLD
 
-        logger.debug(f'cv method: {self.cv_method_name}')
-        logger.debug(f'scale: {self.scale}')
-        logger.debug(f'multi target max threshold: {self.multi_target_max_threshold}')
-        logger.debug(f'multi target distance threshold: {self.multi_target_distance_threshold}')
+        logger.debug(f'cv method: {self.engine_template_cv_method_name}')
+        logger.debug(f'scale: {self.engine_template_scale}')
+        logger.debug(f'multi target max threshold: {self.engine_template_multi_target_max_threshold}')
+        logger.debug(f'multi target distance threshold: {self.engine_template_multi_target_distance_threshold}')
         logger.info(f'engine {self.get_type()} loaded')
 
     def execute(self,
@@ -83,7 +83,7 @@ class TemplateEngine(FindItEngine):
         min_val, max_val, min_loc, max_loc, point_list = self._compare_template(
             template_object,
             target_object,
-            self.scale,
+            self.engine_template_scale,
             engine_template_mask_pic_object
         )
 
@@ -92,10 +92,10 @@ class TemplateEngine(FindItEngine):
             'target_point': max_loc,
             'target_sim': max_val,
             'conf': {
-                'engine_template_cv_method_name': self.cv_method_name,
-                'engine_template_scale': self.scale,
-                'engine_template_multi_target_max_threshold': self.multi_target_max_threshold,
-                'engine_template_multi_target_distance_threshold': self.multi_target_distance_threshold
+                'engine_template_cv_method_name': self.engine_template_cv_method_name,
+                'engine_template_scale': self.engine_template_scale,
+                'engine_template_multi_target_max_threshold': self.engine_template_multi_target_max_threshold,
+                'engine_template_multi_target_distance_threshold': self.engine_template_multi_target_distance_threshold
             },
             'raw': {
                 'min_val': min_val,
@@ -139,7 +139,7 @@ class TemplateEngine(FindItEngine):
             res = cv2.matchTemplate(
                 target_pic_object,
                 resize_template_pic_object,
-                self.cv_method_code,
+                self.engine_template_cv_method_code,
                 mask=mask_pic_object)
             # each of current result is:
             # [(min_val, max_val, min_loc, max_loc), point_list, shape]
@@ -159,7 +159,7 @@ class TemplateEngine(FindItEngine):
         min_loc, max_loc = map(lambda each_location: list(toolbox.fix_location(shape, each_location)),
                                [min_loc, max_loc])
         point_list = [list(toolbox.fix_location(shape, each))
-                      for each in toolbox.point_list_filter(point_list, self.multi_target_distance_threshold)]
+                      for each in toolbox.point_list_filter(point_list, self.engine_template_multi_target_distance_threshold)]
         # sort point list
         point_list.sort(key=lambda i: i[0])
 
@@ -171,7 +171,7 @@ class TemplateEngine(FindItEngine):
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
         # multi target
-        min_thresh = (max_val - 1e-6) * self.multi_target_max_threshold
+        min_thresh = (max_val - 1e-6) * self.engine_template_multi_target_max_threshold
         match_locations = np.where(res >= min_thresh)
         point_list = zip(match_locations[1], match_locations[0])
 
@@ -193,12 +193,12 @@ class FeatureEngine(FindItEngine):
         logger.info('engine {} preparing ...'.format(self.get_type()))
 
         # for kmeans calculation
-        self.cluster_num: int = engine_feature_cluster_num or self.DEFAULT_CLUSTER_NUM
+        self.engine_feature_cluster_num: int = engine_feature_cluster_num or self.DEFAULT_CLUSTER_NUM
         # for feature matching
-        self.distance_threshold: float = engine_feature_distance_threshold or self.DEFAULT_DISTANCE_THRESHOLD
+        self.engine_feature_distance_threshold: float = engine_feature_distance_threshold or self.DEFAULT_DISTANCE_THRESHOLD
 
-        logger.debug('cluster num: {}'.format(self.cluster_num))
-        logger.debug('distance threshold: {}'.format(self.distance_threshold))
+        logger.debug('cluster num: {}'.format(self.engine_feature_cluster_num))
+        logger.debug('distance threshold: {}'.format(self.engine_feature_distance_threshold))
         logger.info('engine {} loaded'.format(self.get_type()))
 
     def execute(self,
@@ -223,8 +223,8 @@ class FeatureEngine(FindItEngine):
             'target_point': readable_center_point,
             'raw': readable_point_list,
             'conf': {
-                'engine_feature_cluster_num': self.cluster_num,
-                'engine_feature_distance_threshold': self.distance_threshold,
+                'engine_feature_cluster_num': self.engine_feature_cluster_num,
+                'engine_feature_distance_threshold': self.engine_feature_distance_threshold,
             },
         }
 
@@ -259,7 +259,7 @@ class FeatureEngine(FindItEngine):
             good = [matches[0]]
         else:
             for m, n in matches:
-                if m.distance < self.distance_threshold * n.distance:
+                if m.distance < self.engine_feature_distance_threshold * n.distance:
                     good.append([m])
 
         point_list = list()
@@ -275,10 +275,10 @@ class FeatureEngine(FindItEngine):
         point_num = len(np_point_list)
 
         # if match points' count is less than clusters
-        if point_num < self.cluster_num:
+        if point_num < self.engine_feature_cluster_num:
             cluster_num = 1
         else:
-            cluster_num = self.cluster_num
+            cluster_num = self.engine_feature_cluster_num
 
         k_means = KMeans(n_clusters=cluster_num).fit(np_point_list)
         mode_label_index = sorted(collections.Counter(k_means.labels_).items(), key=lambda x: x[1])[-1][0]
@@ -289,40 +289,42 @@ class OCREngine(FindItEngine):
     """ OCR engine, binding to tesseract """
     DEFAULT_LANGUAGE = 'eng'
 
-    def __init__(self, *_, **__):
+    def __init__(self,
+                 engine_ocr_lang: str = None,
+                 *_, **__):
+        logger.info('engine {} preparing ...'.format(self.get_type()))
+
+        # check language data before execute function, not here.
+        self.engine_ocr_lang = engine_ocr_lang or self.DEFAULT_LANGUAGE
         self.tess_data_dir, self.available_lang_list = tesserocr.get_languages()
+
+        logger.debug(f'target lang: {self.engine_ocr_lang}')
         logger.debug(f'tess data dir: {self.tess_data_dir}')
         logger.debug(f'available language: {self.available_lang_list}')
         logger.info(f'engine {self.get_type()} loaded')
 
-        # check language data before execute function, not here.
-
     def execute(self,
                 template_object: np.ndarray,
                 target_object: np.ndarray,
-                engine_ocr_lang: str = None,
                 *_, **__) -> dict:
-        engine_ocr_lang = engine_ocr_lang or self.DEFAULT_LANGUAGE
-        logger.info(f'target language: {engine_ocr_lang}')
-
         # check language
-        if engine_ocr_lang not in self.available_lang_list:
+        if self.engine_ocr_lang not in self.available_lang_list:
             return {
                 'conf': {
-                    'engine_ocr_lang': engine_ocr_lang,
+                    'engine_ocr_lang': self.engine_ocr_lang,
                     'engine_ocr_tess_data_dir': self.tess_data_dir,
                     'engine_ocr_available_language_list': self.available_lang_list,
                 },
                 'raw': 'this language not available'
             }
 
-        api = tesserocr.PyTessBaseAPI(lang=engine_ocr_lang)
+        api = tesserocr.PyTessBaseAPI(lang=self.engine_ocr_lang)
         target_pil_object = Image.fromarray(target_object)
         api.SetImage(target_pil_object)
         result_text = api.GetUTF8Text()
         return {
             'conf': {
-                'engine_ocr_lang': engine_ocr_lang,
+                'engine_ocr_lang': self.engine_ocr_lang,
                 'engine_ocr_tess_data_dir': self.tess_data_dir,
                 'engine_ocr_available_language_list': self.available_lang_list,
             },
