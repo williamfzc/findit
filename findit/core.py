@@ -109,7 +109,6 @@ class FindIt(object):
         logger.info('start finding ...')
         target_pic_object = toolbox.pre_pic(target_pic_path, target_pic_object)
 
-        start_time = toolbox.get_timestamp()
         result = dict()
         for each_template_name, each_template_object in self.template.items():
             logger.debug('start analysing: [{}] ...'.format(each_template_name))
@@ -124,13 +123,8 @@ class FindIt(object):
                         target_pic_object,
                         each_result['target_point'],
                         cover=False)
-                    os.makedirs(start_time, exist_ok=True)
-                    mark_pic_path = '{}/{}_{}.png'.format(
-                        start_time,
-                        each_template_name,
-                        each_engine.get_type())
-                    cv2.imwrite(mark_pic_path, target_pic_object_with_mark)
-                    logger.debug('save marked picture to {}'.format(mark_pic_path))
+                    temp_pic_path = toolbox.debug_cv_object(target_pic_object_with_mark)
+                    logger.debug(f'template: {each_template_name}, engine: {each_engine.get_type()}, path: {temp_pic_path}')
 
                 # result filter
                 each_result = self._prune_result(each_result)

@@ -91,3 +91,10 @@ def point_list_filter(point_list: typing.Sequence, distance: float) -> typing.Se
         else:
             new_point_list.append(cur_point)
     return new_point_list
+
+
+def debug_cv_object(target_object: np.ndarray, prefix: str) -> str:
+    """ save target object as a temp picture, and return its path """
+    mark_pic_path = f'{prefix}_{get_timestamp()}.png'
+    cv2.imwrite(mark_pic_path, target_object)
+    return mark_pic_path
