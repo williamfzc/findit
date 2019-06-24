@@ -119,6 +119,7 @@ class TemplateEngine(FindItEngine):
             'max_loc': max_loc,
             'all': point_list,
         })
+        resp.append('ok', True, important=True)
 
         return resp
 
@@ -237,6 +238,7 @@ class FeatureEngine(FindItEngine):
         if not point_list:
             resp.append('target_point', (-1, -1), important=True)
             resp.append('raw', 'not found')
+            resp.append('ok', False, important=True)
             return resp
 
         center_point = self.calculate_center_point(point_list)
@@ -246,6 +248,7 @@ class FeatureEngine(FindItEngine):
 
         resp.append('target_point', readable_center_point, important=True)
         resp.append('raw', readable_point_list)
+        resp.append('ok', True, important=True)
         return resp
 
     def get_feature_point_list(self,
@@ -348,6 +351,7 @@ class OCREngine(FindItEngine):
         # check language
         if self.engine_ocr_lang not in self.engine_ocr_available_lang_list:
             resp.append('raw', 'this language not available', important=True)
+            resp.append('ok', False, important=True)
             return resp
 
         api = tesserocr.PyTessBaseAPI(lang=self.engine_ocr_lang)
@@ -356,6 +360,7 @@ class OCREngine(FindItEngine):
         result_text = api.GetUTF8Text()
 
         resp.append('raw', result_text, important=True)
+        resp.append('ok', True, important=True)
         return resp
 
 
