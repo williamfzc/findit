@@ -51,15 +51,12 @@ def analyse():
 
     # no template name
     if not template_name_list:
-        if ('engine' in new_extra_dict) and (new_extra_dict['engine'] == ['ocr']):
-            template_name_list = list()
-        else:
-            return std_response(
-                status=STATUS_CLIENT_ERROR,
-                msg='template name is empty',
-                request=request.form,
-                response='',
-            )
+        return std_response(
+            status=STATUS_CLIENT_ERROR,
+            msg='template name is empty',
+            request=request.form,
+            response='',
+        )
 
     for each_template_name in template_name_list:
         template_path = utils.get_pic_path_by_name(each_template_name)
