@@ -18,7 +18,7 @@ RUN apt-get update \
 COPY . .
 
 RUN pip install --no-cache-dir . \
-    pip install tesserocr
+    && pip install tesserocr
 
 EXPOSE 9410
 
