@@ -10,15 +10,16 @@ RUN apt-get update \
     # opencv
     && apt-get install -y libglib2.0 libsm6 libxrender1 libxext-dev \
     # ocr
-    && apt-get -y install tesseract-ocr tesseract-ocr-chi-sim libtesseract-dev libleptonica-dev pkg-config \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && pip install -r requirements.txt
+    && apt-get -y install gcc build-essential tesseract-ocr tesseract-ocr-chi-sim libtesseract-dev libleptonica-dev pkg-config \
+    && pip install -r --no-cache-dir requirements.txt
 
 COPY . .
 
 RUN pip install --no-cache-dir . \
-    && pip install tesserocr
+    && pip install tesserocr \
+    && apt-get purge -y --auto-remove gcc build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 9410
 
