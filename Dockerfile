@@ -11,7 +11,7 @@ RUN apt-get update \
     && apt-get install -y libglib2.0 libsm6 libxrender1 libxext-dev \
     # ocr
     && apt-get -y install gcc build-essential tesseract-ocr tesseract-ocr-chi-sim libtesseract-dev libleptonica-dev pkg-config \
-    && pip install -r --no-cache-dir requirements.txt
+    && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
