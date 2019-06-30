@@ -1,12 +1,13 @@
-import cv2
 import os
 import numpy as np
 import typing
 import json
+# DO NOT remove this
+import cv2
 
 from findit.logger import logger, LOGGER_FLAG
 from findit import toolbox
-from findit.engine import engine_dict, FindItEngineResponse
+from findit.engine import engine_dict, FindItEngineResponse, FindItEngine
 
 
 class FindIt(object):
@@ -35,8 +36,8 @@ class FindIt(object):
         if not engine:
             # default
             engine = ['template', 'feature']
-        self.engine_name_list = engine
-        self.engine_list = None
+        self.engine_name_list: typing.List[str] = engine
+        self.engine_list: typing.List[FindItEngine] = list()
         self.set_engine(engine, *args, **kwargs)
 
         # pro mode
@@ -79,29 +80,74 @@ class FindIt(object):
             self.template[pic_name] = toolbox.load_grey_from_path(abs_path)
         logger.info(f'load template [{pic_name}] successfully')
 
+    def _need_template(self) -> bool:
+        """ check engine list, and return bool about dependencies of template picture (ocr engine need no template) """
+
+        # todo only ocr is special now
+        return self.engine_name_list != ['ocr']
+
     def find(self,
              target_pic_name: str,
              target_pic_path: str = None,
              target_pic_object: np.ndarray = None,
-             mark_pic: bool = None,
-             *args, **kwargs):
+             *args, **kwargs) -> dict:
         """
         start match
 
         :param target_pic_name: eg: 'your_target_picture_1'
         :param target_pic_path: '/path/to/your/target.png'
         :param target_pic_object: your_pic_cv_object (loaded by cv2)
-        :param mark_pic: enable this, and you will get a picture file with a mark of result
         :return:
         """
 
         # pre assert
-        assert self.template, 'template is empty'
         assert (target_pic_path is not None) or (target_pic_object is not None), 'need path or cv object'
 
         # load target
         logger.info('start finding ...')
         target_pic_object = toolbox.pre_pic(target_pic_path, target_pic_object)
+
+        if self._need_template():
+            find_func = self._find_with_template
+        else:
+            find_func = self._find_without_template
+        result = find_func(
+            target_pic_object,
+            target_pic_name=target_pic_name,
+            target_pic_path=target_pic_path,
+            *args, **kwargs
+        )
+        return {
+            'target_name': target_pic_name,
+            'target_path': target_pic_path,
+            'data': result
+        }
+
+    def _find_without_template(self,
+                               target_pic_object: np.ndarray,
+                               target_pic_name: str = None,
+                               *args, **kwargs) -> dict:
+        logger.debug(f'start analysing: [{target_pic_name}] ...')
+
+        current_result = dict()
+        for each_engine in self.engine_list:
+            each_result = each_engine.execute(None, target_pic_object, *args, **kwargs)
+
+            # result filter
+            each_result = self._prune_result(each_result)
+            current_result[each_engine.get_type()] = each_result
+
+        logger.debug(f'result for [{target_pic_name}]: {json.dumps(current_result)}')
+        return {
+                target_pic_name: current_result,
+            }
+
+    def _find_with_template(self,
+                            target_pic_object: np.ndarray,
+                            _mark_pic: bool = None,
+                            *args, **kwargs) -> dict:
+        # pre assert
+        assert self.template, 'template is empty'
 
         result = dict()
         for each_template_name, each_template_object in self.template.items():
@@ -112,13 +158,16 @@ class FindIt(object):
                 each_result = each_engine.execute(each_template_object, target_pic_object, *args, **kwargs)
 
                 # for debug ONLY!
-                if mark_pic:
+                if _mark_pic:
                     target_pic_object_with_mark = toolbox.mark_point(
                         target_pic_object,
                         each_result['target_point'],
                         cover=False)
                     temp_pic_path = toolbox.debug_cv_object(target_pic_object_with_mark)
-                    logger.debug(f'template: {each_template_name}, engine: {each_engine.get_type()}, path: {temp_pic_path}')
+                    logger.debug(
+                        f'template: {each_template_name}, '
+                        f'engine: {each_engine.get_type()}, '
+                        f'path: {temp_pic_path}')
 
                 # result filter
                 each_result = self._prune_result(each_result)
@@ -128,13 +177,7 @@ class FindIt(object):
             logger.debug(f'result for [{each_template_name}]: {json.dumps(current_result)}')
             result[each_template_name] = current_result
 
-        final_result = {
-            'target_name': target_pic_name,
-            'target_path': target_pic_path,
-            'data': result,
-        }
-        logger.info(f'result: {json.dumps(final_result)}')
-        return final_result
+        return result
 
     def _prune_result(self, response: FindItEngineResponse) -> dict:
         if self.pro_mode:
