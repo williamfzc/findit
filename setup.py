@@ -15,7 +15,7 @@ install_requirement_list = [
 
 setup(
     name='findit',
-    version='0.5.0',
+    version='0.5.1',
     description='find target icon on your picture, and get its position',
     author='williamfzc',
     author_email='fengzc@vip.qq.com',
