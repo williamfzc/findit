@@ -67,7 +67,7 @@ class TemplateEngine(FindItEngine):
                  engine_template_multi_target_distance_threshold: float = None,
                  *_, **__):
         """ eg: engine_template_cv_method_name -> cv_method_name """
-        logger.info('engine {} preparing ...'.format(self.get_type()))
+        logger.info(f'engine {self.get_type()} preparing ...')
 
         # cv
         self.engine_template_cv_method_name = engine_template_cv_method_name or self.DEFAULT_CV_METHOD_NAME
@@ -172,7 +172,7 @@ class TemplateEngine(FindItEngine):
         min_val, max_val, min_loc, max_loc = loc_val
 
         # fix position
-        logger.debug('raw compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
+        logger.debug(f'raw compare result: {min_val}, {max_val}, {min_loc}, {max_loc}')
         min_loc, max_loc = map(lambda each_location: list(toolbox.fix_location(shape, each_location)),
                                [min_loc, max_loc])
         point_list = [list(toolbox.fix_location(shape, each))
@@ -181,7 +181,7 @@ class TemplateEngine(FindItEngine):
         # sort point list
         point_list.sort(key=lambda i: i[0])
 
-        logger.debug('fixed compare result: {}, {}, {}, {}'.format(min_val, max_val, min_loc, max_loc))
+        logger.debug(f'fixed compare result: {min_val}, {max_val}, {min_loc}, {max_loc}')
 
         return min_val, max_val, min_loc, max_loc, point_list
 
@@ -202,7 +202,9 @@ class TemplateEngine(FindItEngine):
 class FeatureEngine(FindItEngine):
     # TODO need many sample pictures to test
     DEFAULT_CLUSTER_NUM: int = 3
-    DEFAULT_DISTANCE_THRESHOLD: float = 0.75
+    # higher -> more
+    DEFAULT_DISTANCE_THRESHOLD: float = 0.9
+    # higher -> less
     DEFAULT_MIN_HESSIAN: int = 200
 
     def __init__(self,
@@ -210,7 +212,7 @@ class FeatureEngine(FindItEngine):
                  engine_feature_distance_threshold: float = None,
                  engine_feature_min_hessian: int = None,
                  *_, **__):
-        logger.info('engine {} preparing ...'.format(self.get_type()))
+        logger.info(f'engine {self.get_type()} preparing ...')
 
         # for kmeans calculation
         self.engine_feature_cluster_num: int = engine_feature_cluster_num or self.DEFAULT_CLUSTER_NUM
@@ -220,10 +222,10 @@ class FeatureEngine(FindItEngine):
         # higher threshold, less points
         self.engine_feature_min_hessian: int = engine_feature_min_hessian or self.DEFAULT_MIN_HESSIAN
 
-        logger.debug('cluster num: {}'.format(self.engine_feature_cluster_num))
-        logger.debug('distance threshold: {}'.format(self.engine_feature_distance_threshold))
-        logger.debug('hessian threshold: {}'.format(self.engine_feature_min_hessian))
-        logger.info('engine {} loaded'.format(self.get_type()))
+        logger.debug(f'cluster num: {self.engine_feature_cluster_num}')
+        logger.debug(f'distance threshold: {self.engine_feature_distance_threshold}')
+        logger.debug(f'hessian threshold: {self.engine_feature_min_hessian}')
+        logger.info(f'engine {self.get_type()} loaded')
 
     def execute(self,
                 template_object: np.ndarray,
@@ -247,6 +249,7 @@ class FeatureEngine(FindItEngine):
         readable_point_list = [list(each) for each in point_list]
 
         resp.append('target_point', readable_center_point, important=True)
+        resp.append('feature_point_num', len(readable_point_list), important=True)
         resp.append('raw', readable_point_list)
         resp.append('ok', True, important=True)
         return resp
@@ -330,7 +333,7 @@ class OCREngine(FindItEngine):
     def __init__(self,
                  engine_ocr_lang: str = None,
                  *_, **__):
-        logger.info('engine {} preparing ...'.format(self.get_type()))
+        logger.info(f'engine {self.get_type()} preparing ...')
 
         # check language data before execute function, not here.
         self.engine_ocr_lang = engine_ocr_lang or self.DEFAULT_LANGUAGE
