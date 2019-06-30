@@ -7,7 +7,8 @@ python:
   - "3.7"
 
 install:
-  - apt-get -y install tesseract-ocr tesseract-ocr-chi-sim libtesseract-dev libleptonica-dev pkg-config
+  - sudo apt-get -qq update
+  - sudo apt-get -y install tesseract-ocr tesseract-ocr-chi-sim libtesseract-dev libleptonica-dev pkg-config
   - pip install pytest
   - pip install findit-client
   - pip install tesserocr
