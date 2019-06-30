@@ -49,15 +49,6 @@ def analyse():
     extra_dict = json.loads(request.form.get('extras'))
     new_extra_dict = utils.handle_extras(extra_dict)
 
-    # no template name
-    if not template_name_list:
-        return std_response(
-            status=STATUS_CLIENT_ERROR,
-            msg='template name is empty',
-            request=request.form,
-            response='',
-        )
-
     for each_template_name in template_name_list:
         template_path = utils.get_pic_path_by_name(each_template_name)
 
