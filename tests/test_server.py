@@ -35,6 +35,7 @@ def test_analyse_with_path():
     arg_list = ['msg', 'status', 'request', 'response', 'data']
     for each in arg_list:
         assert hasattr(result, each)
+    assert result.template_engine.data
 
 
 def test_analyse_with_extras():
@@ -48,3 +49,9 @@ def test_analyse_with_extras():
     assert 'a' in request_dict['extras']
     assert 'b' in request_dict['extras']
     assert 'engine_template_scale' in request_dict['extras']
+
+
+def test_analyse_without_template():
+    result = find_it_client.analyse_with_path(
+        TARGET_PATH, None, engine=['ocr'])
+    assert result.ocr_engine.data
