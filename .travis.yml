@@ -11,6 +11,7 @@ install:
   - sudo apt-get -y install tesseract-ocr tesseract-ocr-chi-sim libtesseract-dev libleptonica-dev pkg-config
   - pip install pytest
   - pip install findit-client
+  - pip install Pillow
   - pip install tesserocr
   - pip install .
 

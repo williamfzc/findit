@@ -16,6 +16,7 @@ RUN apt-get update \
 COPY . .
 
 RUN pip install --no-cache-dir . \
+    && pip install Pillow \
     && pip install tesserocr \
     && apt-get purge -y --auto-remove gcc build-essential \
     && apt-get clean \

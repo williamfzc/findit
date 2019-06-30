@@ -11,9 +11,9 @@ from findit import toolbox
 from findit.toolbox import Point
 
 try:
+    # should install tesseract and tesserocr
     import tesserocr
-
-    # tesserocr only supports PIL
+    # tesserocr only supports PIL, should install Pillow first
     from PIL import Image
 except ImportError:
     warnings.warn('tesserocr should be installed if you want to use OCR engine')
