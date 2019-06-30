@@ -41,7 +41,7 @@ class FindIt(object):
 
         # pro mode
         self.pro_mode = bool(pro_mode)
-        logger.info('in pro mode: {}'.format(self.pro_mode))
+        logger.info(f'in pro mode: {self.pro_mode}')
 
     @staticmethod
     def switch_logger(status: bool):
@@ -53,7 +53,7 @@ class FindIt(object):
             logger.disable(LOGGER_FLAG)
 
     def set_engine(self, engine_name_list, *args, **kwargs):
-        logger.info('set engine: {}'.format(engine_name_list))
+        logger.info(f'set engine: {engine_name_list}')
         self.engine_list = [engine_dict[each](*args, **kwargs) for each in engine_name_list]
 
     def load_template(self,
@@ -77,7 +77,7 @@ class FindIt(object):
             logger.info('load template from picture path ...')
             abs_path = os.path.abspath(pic_path)
             self.template[pic_name] = toolbox.load_grey_from_path(abs_path)
-        logger.info('load template [{}] successfully'.format(pic_name))
+        logger.info(f'load template [{pic_name}] successfully')
 
     def find(self,
              target_pic_name: str,
@@ -105,7 +105,7 @@ class FindIt(object):
 
         result = dict()
         for each_template_name, each_template_object in self.template.items():
-            logger.debug('start analysing: [{}] ...'.format(each_template_name))
+            logger.debug(f'start analysing: [{each_template_name}] ...')
 
             current_result = dict()
             for each_engine in self.engine_list:
@@ -125,7 +125,7 @@ class FindIt(object):
 
                 current_result[each_engine.get_type()] = each_result
 
-            logger.debug('result for [{}]: {}'.format(each_template_name, json.dumps(current_result)))
+            logger.debug(f'result for [{each_template_name}]: {json.dumps(current_result)}')
             result[each_template_name] = current_result
 
         final_result = {
@@ -133,7 +133,7 @@ class FindIt(object):
             'target_path': target_pic_path,
             'data': result,
         }
-        logger.info('result: {}'.format(json.dumps(final_result)))
+        logger.info(f'result: {json.dumps(final_result)}')
         return final_result
 
     def _prune_result(self, response: FindItEngineResponse) -> dict:
