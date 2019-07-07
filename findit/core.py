@@ -10,6 +10,29 @@ from findit import toolbox
 from findit.engine import engine_dict, FindItEngineResponse, FindItEngine
 
 
+class _TemplateManager(object):
+    def __init__(self):
+        self._template_list: list = list()
+
+    def reset(self):
+        self._template_list = list()
+
+    def save(self, pic_name: str, pic_item: typing.Union[str, np.ndarray]):
+        self._template_list.append((pic_name, pic_item))
+
+    def load(self) -> tuple:
+        for pic_name, pic_item in self._template_list:
+            # is path
+            if isinstance(pic_item, str):
+                yield pic_name, toolbox.load_grey_from_path(pic_item)
+            # is object
+            else:
+                yield pic_name, toolbox.load_grey_from_cv2_object(pic_item)
+
+    def is_empty(self):
+        return len(self._template_list) == 0
+
+
 class FindIt(object):
     """ FindIt Operator """
 
@@ -25,9 +48,8 @@ class FindIt(object):
         :param engine: choose image processing engine, eg: ['feature', 'template']
         :param pro_mode:
         """
-        # template pic dict,
-        # { pic_name: pic_cv_object }
-        self.template: typing.Dict[str, np.ndarray] = dict()
+        # template manager
+        self.template: _TemplateManager = _TemplateManager()
 
         # init logger
         self.switch_logger(bool(need_log))
@@ -73,11 +95,12 @@ class FindIt(object):
 
         if pic_object is not None:
             logger.info('load template from picture object directly ...')
-            self.template[pic_name] = toolbox.load_grey_from_cv2_object(pic_object)
+            self.template.save(pic_name, pic_object)
         else:
             logger.info('load template from picture path ...')
             abs_path = os.path.abspath(pic_path)
-            self.template[pic_name] = toolbox.load_grey_from_path(abs_path)
+            self.template.save(pic_name, abs_path)
+
         logger.info(f'load template [{pic_name}] successfully')
 
     def _need_template(self) -> bool:
@@ -139,20 +162,21 @@ class FindIt(object):
 
         logger.debug(f'result for [{target_pic_name}]: {json.dumps(current_result)}')
         return {
-                target_pic_name: current_result,
-            }
+            target_pic_name: current_result,
+        }
 
     def _find_with_template(self,
                             target_pic_object: np.ndarray,
                             _mark_pic: bool = None,
                             *args, **kwargs) -> dict:
         # pre assert
-        assert self.template, 'template is empty'
+        assert not self.template.is_empty(), 'template is empty'
 
         result = dict()
-        for each_template_name, each_template_object in self.template.items():
+        for each_template_name, each_template_object in self.template.load():
             logger.debug(f'start analysing: [{each_template_name}] ...')
 
+            # todo lazy load
             current_result = dict()
             for each_engine in self.engine_list:
                 each_result = each_engine.execute(each_template_object, target_pic_object, *args, **kwargs)
