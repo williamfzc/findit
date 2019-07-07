@@ -350,7 +350,10 @@ class OCREngine(FindItEngine):
                 target_object: np.ndarray,
                 *_, **__) -> FindItEngineResponse:
         resp = FindItEngineResponse()
-        resp.append('conf', self.__dict__, important=True)
+
+        # _ft is not JSON serializable
+        conf_dict = {k: _ for k, _ in self.__dict__.items() if k != '_ft'}
+        resp.append('conf', conf_dict, important=True)
 
         # check language
         if self.engine_ocr_lang not in self.engine_ocr_available_lang_list:
