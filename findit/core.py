@@ -160,7 +160,7 @@ class FindIt(object):
             each_result = self._prune_result(each_result)
             current_result[each_engine.get_type()] = each_result
 
-        logger.debug(f'result for [{target_pic_name}]: {json.dumps(current_result)}')
+        logger.debug(f'result for [{target_pic_name}]: {json.dumps(current_result, default=lambda x: x.__dict__)}')
         return {
             target_pic_name: current_result,
         }
@@ -197,8 +197,7 @@ class FindIt(object):
                 each_result = self._prune_result(each_result)
 
                 current_result[each_engine.get_type()] = each_result
-
-            logger.debug(f'result for [{each_template_name}]: {json.dumps(current_result)}')
+            logger.debug(f'result for [{each_template_name}]: {json.dumps(current_result, default=lambda x: x.__dict__)}')
             result[each_template_name] = current_result
 
         return result

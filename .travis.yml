@@ -12,7 +12,7 @@ install:
   - pip install pytest
   - pip install findit-client
   - pip install Pillow
-  - pip install tesserocr
+  - pip install findtext
   - pip install .
 
 script:

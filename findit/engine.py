@@ -11,12 +11,9 @@ from findit import toolbox
 from findit.toolbox import Point
 
 try:
-    # should install tesseract and tesserocr
-    import tesserocr
-    # tesserocr only supports PIL, should install Pillow first
-    from PIL import Image
+    import findtext
 except ImportError:
-    warnings.warn('tesserocr should be installed if you want to use OCR engine')
+    warnings.warn('findtext should be installed if you want to use OCR engine')
 
 
 class FindItEngineResponse(object):
@@ -175,6 +172,7 @@ class TemplateEngine(FindItEngine):
         logger.debug(f'raw compare result: {min_val}, {max_val}, {min_loc}, {max_loc}')
         min_loc, max_loc = map(lambda each_location: list(toolbox.fix_location(shape, each_location)),
                                [min_loc, max_loc])
+
         point_list = [list(toolbox.fix_location(shape, each))
                       for each in
                       toolbox.point_list_filter(point_list, self.engine_template_multi_target_distance_threshold)]
@@ -337,7 +335,10 @@ class OCREngine(FindItEngine):
 
         # check language data before execute function, not here.
         self.engine_ocr_lang = engine_ocr_lang or self.DEFAULT_LANGUAGE
-        self.engine_ocr_tess_data_dir, self.engine_ocr_available_lang_list = tesserocr.get_languages()
+        self._ft = findtext.FindText(lang=engine_ocr_lang)
+
+        self.engine_ocr_tess_data_dir = self._ft.get_data_home()
+        self.engine_ocr_available_lang_list = self._ft.get_available_lang()
 
         logger.debug(f'target lang: {self.engine_ocr_lang}')
         logger.debug(f'tess data dir: {self.engine_ocr_tess_data_dir}')
@@ -357,10 +358,8 @@ class OCREngine(FindItEngine):
             resp.append('ok', False, important=True)
             return resp
 
-        api = tesserocr.PyTessBaseAPI(lang=self.engine_ocr_lang)
-        target_pil_object = Image.fromarray(target_object)
-        api.SetImage(target_pil_object)
-        result_text = api.GetUTF8Text()
+        word_block_list = self._ft.find_word(image_object=target_object, deep=True, offset=5)
+        result_text = ''.join([i.content for i in word_block_list])
 
         resp.append('raw', result_text, important=True)
         resp.append('ok', True, important=True)
