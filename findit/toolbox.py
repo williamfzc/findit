@@ -78,8 +78,11 @@ def cv2file(pic_object: np.ndarray) -> str:
     os.remove(temp_pic_file_object_path)
 
 
-def point_list_filter(point_list: typing.Sequence, distance: float) -> typing.Sequence:
+def point_list_filter(point_list: typing.Sequence, distance: float, point_limit: int = None) -> typing.Sequence:
     """ remove some points which are too close """
+    if not point_limit:
+        point_limit = 20
+
     point_list = sorted(list(set(point_list)), key=lambda o: o[0])
     new_point_list = [point_list[0], ]
     for cur_point in point_list[1:]:
@@ -90,6 +93,8 @@ def point_list_filter(point_list: typing.Sequence, distance: float) -> typing.Se
                 break
         else:
             new_point_list.append(cur_point)
+            if len(new_point_list) >= point_limit:
+                break
     return new_point_list
 
 
