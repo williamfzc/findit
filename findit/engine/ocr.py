@@ -1,5 +1,6 @@
 import numpy as np
 import warnings
+import typing
 
 from findit.logger import logger
 from findit.engine.base import FindItEngine, FindItEngineResponse
@@ -72,8 +73,23 @@ class OCREngine(FindItEngine):
             offset=self.engine_ocr_offset)
 
         available_result_list = [i for i in word_block_list if i.content]
-        result_text = [i.content for i in available_result_list]
+        result_text = self._improve_text_result([i.content for i in available_result_list])
+
         resp.append('content', result_text, important=True)
         resp.append('raw', [i.__dict__ for i in word_block_list])
         resp.append('ok', True, important=True)
         return resp
+
+    @staticmethod
+    def _improve_text_result(origin: typing.List[str]) -> typing.List[str]:
+        try:
+            import jieba
+        except ImportError:
+            warnings.warn('no package named jieba, you can install it for better ocr result')
+            return origin
+
+        new = list()
+        for each in origin:
+            text_cut = jieba.cut(each)
+            new.extend(text_cut)
+        return list(set(new))
