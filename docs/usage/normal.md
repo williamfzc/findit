@@ -72,3 +72,17 @@ pprint.pprint(result)
 - Template Matching 的计算结果是 `(505, 374)`
 
 上述完整例子与图片在[sample](https://github.com/williamfzc/findit/tree/master/sample)中。更多进阶用法请参考 [sample/demo.py](https://github.com/williamfzc/findit/tree/master/sample/demo.py)。
+
+## 配置
+
+findit提供的配置方式保证了它能够灵活地响应参数。
+
+- 在 findit 初始化时会对 engine 进行初始化，在此处传入的参数将会传入 engine 的 `__init__` 方法，进而影响初始化 engine 的默认行为。传入的具体参数名称可以参考对应 engine 的 `__init__` 方法
+
+    ```python
+    # 例如，将ocr语言设定为 chi_sim+eng
+    fi = FindIt(engine=['ocr'], engine_ocr_lang='chi_sim+eng')
+    ```
+
+- 在 find 方法被调用时，此处传入的参数将会传入 engine 的 `execute` 方法，进而影响 engine 的单次行为。传入的具体参数名称可以参考对应 engine 的 `execute` 方法
+- 所有的引擎参数均以 `engine_引擎类型_参数名` 的形式存在。例如，ocr引擎中的语言设置即对应 `engine_ocr_lang` 
