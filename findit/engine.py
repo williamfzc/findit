@@ -335,6 +335,7 @@ class OCREngine(FindItEngine):
 
         # check language data before execute function, not here.
         self.engine_ocr_lang = engine_ocr_lang or self.DEFAULT_LANGUAGE
+        assert findtext, 'findtext should be installed if you want to use OCR engine'
         self._ft = findtext.FindText(lang=engine_ocr_lang)
 
         self.engine_ocr_tess_data_dir = self._ft.get_data_home()
