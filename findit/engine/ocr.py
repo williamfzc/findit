@@ -12,7 +12,14 @@ except ImportError:
 
 class OCREngine(FindItEngine):
     """ OCR engine, binding to tesseract """
-    DEFAULT_LANGUAGE = 'eng'
+
+    # language settings, same as tesseract
+    # if you want to use chi_sim and eng, you can set it 'chi_sim+eng'
+    DEFAULT_LANGUAGE: str = 'eng'
+    # offset for words ( sometimes causes out of range, take care )
+    DEFAULT_OFFSET: int = 0
+    # deep query
+    DEFAULT_DEEP: bool = False
 
     def __init__(self,
                  engine_ocr_lang: str = None,
@@ -21,6 +28,9 @@ class OCREngine(FindItEngine):
 
         # check language data before execute function, not here.
         self.engine_ocr_lang = engine_ocr_lang or self.DEFAULT_LANGUAGE
+        self.engine_ocr_offset = self.DEFAULT_OFFSET
+        self.engine_ocr_deep = self.DEFAULT_DEEP
+
         assert findtext, 'findtext should be installed if you want to use OCR engine'
         self._ft = findtext.FindText(lang=engine_ocr_lang)
 
@@ -35,22 +45,35 @@ class OCREngine(FindItEngine):
     def execute(self,
                 template_object: np.ndarray,
                 target_object: np.ndarray,
+                engine_ocr_offset: int = None,
+                engine_ocr_deep: bool = None,
                 *_, **__) -> FindItEngineResponse:
         resp = FindItEngineResponse()
+
+        if engine_ocr_offset:
+            self.engine_ocr_offset = engine_ocr_offset
+        if engine_ocr_deep:
+            self.engine_ocr_deep = engine_ocr_deep
 
         # _ft is not JSON serializable
         conf_dict = {k: _ for k, _ in self.__dict__.items() if k != '_ft'}
         resp.append('conf', conf_dict, important=True)
 
         # check language
-        if self.engine_ocr_lang not in self.engine_ocr_available_lang_list:
-            resp.append('raw', 'this language not available', important=True)
-            resp.append('ok', False, important=True)
-            return resp
+        for each_lang in self.engine_ocr_lang.split('+'):
+            if each_lang not in self.engine_ocr_available_lang_list:
+                resp.append('raw', 'this language not available', important=True)
+                resp.append('ok', False, important=True)
+                return resp
 
-        word_block_list = self._ft.find_word(image_object=target_object, deep=True, offset=5)
-        result_text = ''.join([i.content for i in word_block_list])
+        word_block_list = self._ft.find_word(
+            image_object=target_object,
+            deep=self.engine_ocr_deep,
+            offset=self.engine_ocr_offset)
 
-        resp.append('raw', result_text, important=True)
+        available_result_list = [i for i in word_block_list if i.content]
+        result_text = [i.content for i in available_result_list]
+        resp.append('content', result_text, important=True)
+        resp.append('raw', [i.__dict__ for i in word_block_list])
         resp.append('ok', True, important=True)
         return resp
