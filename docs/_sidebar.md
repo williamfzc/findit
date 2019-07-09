@@ -2,5 +2,6 @@
 * [使用]()
     * [以C/S模式部署](usage/client+server)
     * [以常规模式部署](usage/normal)
+* [engine功能介绍](functions/)
 * [设计理念及由来](design/)
 * [后续规划](plan/)

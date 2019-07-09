@@ -30,6 +30,8 @@ cd findit
 pip install -e .
 ```
 
+或者直接[通过docker使用](https://williamfzc.github.io/findit/#/usage/client+server?id=%e7%94%a8-docker-%e9%83%a8%e7%bd%b2)，docker镜像默认使用最新的代码进行构建。
+
 ## 使用
 
 例如你有两张图片，分别是微信图标：
