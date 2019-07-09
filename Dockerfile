@@ -19,6 +19,7 @@ RUN pip install --no-cache-dir . \
     && pip install --no-cache-dir Pillow \
     && pip install --no-cache-dir tesserocr \
     && pip install --no-cache-dir findtext \
+    && pip install --no-cache-dir jieba \
     && apt-get purge -y --auto-remove gcc build-essential \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
