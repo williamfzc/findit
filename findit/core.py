@@ -104,9 +104,9 @@ class FindIt(object):
         logger.info(f'load template [{pic_name}] successfully')
 
     def _need_template(self) -> bool:
-        """ check engine list, and return bool about dependencies of template picture (ocr engine need no template) """
-
-        # todo only ocr is special now
+        """
+        check engine list, and return bool about dependencies of template picture (eg: ocr engine need no template)
+        """
         return self.engine_name_list != ['ocr']
 
     def find(self,
