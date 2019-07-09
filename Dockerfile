@@ -16,8 +16,9 @@ RUN apt-get update \
 COPY . .
 
 RUN pip install --no-cache-dir . \
-    && pip install Pillow \
-    && pip install tesserocr \
+    && pip install --no-cache-dir Pillow \
+    && pip install --no-cache-dir tesserocr \
+    && pip install --no-cache-dir findtext \
     && apt-get purge -y --auto-remove gcc build-essential \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
