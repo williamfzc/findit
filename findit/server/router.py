@@ -58,7 +58,7 @@ def analyse():
                 status=STATUS_CLIENT_ERROR,
                 msg=f'no template named: {each_template_name}',
                 request=request.form,
-                response='',
+                response=dict(),
             )
         template_dict[each_template_name] = template_path
 
