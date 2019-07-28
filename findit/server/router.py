@@ -46,7 +46,8 @@ def analyse():
     template_dict = dict()
 
     # optional
-    extra_dict = json.loads(request.form.get('extras'))
+    extra_str = request.form.get('extras')
+    extra_dict = json.loads(extra_str) if extra_str else dict()
     new_extra_dict = utils.handle_extras(extra_dict)
 
     for each_template_name in template_name_list:
@@ -58,7 +59,7 @@ def analyse():
                 status=STATUS_CLIENT_ERROR,
                 msg=f'no template named: {each_template_name}',
                 request=request.form,
-                response='',
+                response=dict(),
             )
         template_dict[each_template_name] = template_path
 

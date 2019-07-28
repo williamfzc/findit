@@ -32,8 +32,8 @@ if __name__ == '__main__':
     config.PIC_DIR_PATH = args.dir or config.PIC_DIR_PATH
 
     # should not be empty
-    assert config.SERVER_PORT, 'no port configured'
-    assert config.PIC_DIR_PATH, 'no path root configured'
+    assert config.SERVER_PORT, 'no port configured, eg: --port 9410'
+    assert config.PIC_DIR_PATH, 'no path root configured, eg: --dir path/to/your/pic/dir'
 
     # start server
     start_server()
