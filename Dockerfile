@@ -24,6 +24,8 @@ RUN pip install --no-cache-dir . \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+ENV LC_ALL=C
+
 EXPOSE 9410
 
 CMD ["python", "-m", "findit.server", "--dir", "/root/pics"]
