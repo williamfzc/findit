@@ -19,12 +19,14 @@ class TemplateEngine(FindItEngine):
     DEFAULT_SCALE: typing.Sequence = (1, 3, 10)
     DEFAULT_MULTI_TARGET_MAX_THRESHOLD: float = 0.99
     DEFAULT_MULTI_TARGET_DISTANCE_THRESHOLD: float = 10.0
+    DEFAULT_COMPRESS_RATE: float = 1.0
 
     def __init__(self,
                  engine_template_cv_method_name: str = None,
                  engine_template_scale: typing.Sequence = None,
                  engine_template_multi_target_max_threshold: float = None,
                  engine_template_multi_target_distance_threshold: float = None,
+                 engine_template_compress_rate: float = None,
                  *_, **__):
         """ eg: engine_template_cv_method_name -> cv_method_name """
         logger.info(f'engine {self.get_type()} preparing ...')
@@ -40,10 +42,14 @@ class TemplateEngine(FindItEngine):
         self.engine_template_multi_target_max_threshold = engine_template_multi_target_max_threshold or self.DEFAULT_MULTI_TARGET_MAX_THRESHOLD
         self.engine_template_multi_target_distance_threshold = engine_template_multi_target_distance_threshold or self.DEFAULT_MULTI_TARGET_DISTANCE_THRESHOLD
 
+        # compression
+        self.engine_template_compress_rate = engine_template_compress_rate or self.DEFAULT_COMPRESS_RATE
+
         logger.debug(f'cv method: {self.engine_template_cv_method_name}')
         logger.debug(f'scale: {self.engine_template_scale}')
         logger.debug(f'multi target max threshold: {self.engine_template_multi_target_max_threshold}')
         logger.debug(f'multi target distance threshold: {self.engine_template_multi_target_distance_threshold}')
+        logger.debug(f'compress rate: {self.engine_template_compress_rate}')
         logger.info(f'engine {self.get_type()} loaded')
 
     def execute(self,
@@ -98,8 +104,14 @@ class TemplateEngine(FindItEngine):
         :param mask_pic_object:
         :return: min_val, max_val, min_loc, max_loc
         """
-        pic_height, pic_width = target_pic_object.shape[:2]
         result_list = list()
+
+        # compress
+        pic_width, pic_height = target_pic_object.shape[:2]
+        logger.debug(f'target object size before compressing: w={pic_width}, h={pic_height}')
+        target_pic_object = toolbox.compress_frame(target_pic_object, self.engine_template_compress_rate)
+        pic_width, pic_height = target_pic_object.shape[:2]
+        logger.debug(f'target object size after compressing: w={pic_width}, h={pic_height}')
 
         for each_scale in np.linspace(*scale):
             # resize template
@@ -110,7 +122,7 @@ class TemplateEngine(FindItEngine):
                 mask_pic_object = toolbox.resize_pic_scale(mask_pic_object, each_scale)
 
             # if template's size is larger than raw picture, break
-            if resize_template_pic_object.shape[0] > pic_height or resize_template_pic_object.shape[1] > pic_width:
+            if resize_template_pic_object.shape[0] > pic_width or resize_template_pic_object.shape[1] > pic_height:
                 break
 
             res = cv2.matchTemplate(
@@ -132,8 +144,13 @@ class TemplateEngine(FindItEngine):
         min_val, max_val, min_loc, max_loc = loc_val
 
         # fix position
-        logger.debug(f'raw compare result: {min_val}, {max_val}, {min_loc}, {max_loc}')
+        logger.debug(f'raw compare result: {max_loc}, {max_val}')
         min_loc, max_loc = map(lambda each_location: list(toolbox.fix_location(shape, each_location)),
+                               [min_loc, max_loc])
+
+        # de compress
+        logger.debug(f'decompress compare result: {max_loc}, {max_val}')
+        min_loc, max_loc = map(lambda p: toolbox.decompress_point(p, self.engine_template_compress_rate),
                                [min_loc, max_loc])
 
         point_list = [list(toolbox.fix_location(shape, each))
@@ -142,8 +159,7 @@ class TemplateEngine(FindItEngine):
         # sort point list
         point_list.sort(key=lambda i: i[0])
 
-        logger.debug(f'fixed compare result: {min_val}, {max_val}, {min_loc}, {max_loc}')
-
+        logger.debug(f'fixed compare result: {max_loc}, {max_val}')
         return min_val, max_val, min_loc, max_loc, point_list
 
     def _parse_res(self, res: np.ndarray) -> typing.Sequence:

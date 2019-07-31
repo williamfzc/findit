@@ -43,6 +43,55 @@ def resize_pic_scale(pic_object: np.ndarray, target_scale: np.ndarray) -> np.nda
     return imutils.resize(pic_object, width=int(pic_object.shape[1] * target_scale))
 
 
+def turn_grey(old: np.ndarray) -> np.ndarray:
+    try:
+        return cv2.cvtColor(old, cv2.COLOR_RGB2GRAY)
+    except cv2.error:
+        return old
+
+
+def decompress_point(old: typing.Tuple, compress_rate: float) -> typing.List:
+    return [int(i / compress_rate) for i in old]
+
+
+def compress_frame(old: np.ndarray,
+                   compress_rate: float = None,
+                   target_size: typing.Tuple[int, int] = None,
+                   not_grey: bool = None,
+                   interpolation: int = None) -> np.ndarray:
+    """
+    Compress frame
+
+    :param old:
+        origin frame
+
+    :param compress_rate:
+        before_pic * compress_rate = after_pic. default to 1 (no compression)
+        eg: 0.2 means 1/5 size of before_pic
+
+    :param target_size:
+        tuple. (100, 200) means compressing before_pic to 100x200
+
+    :param not_grey:
+        convert into grey if True
+
+    :param interpolation:
+    :return:
+    """
+
+    target = turn_grey(old) if not not_grey else old
+    if not interpolation:
+        interpolation = cv2.INTER_AREA
+    # target size first
+    if target_size:
+        return cv2.resize(target, target_size, interpolation=interpolation)
+    # else, use compress rate
+    # default rate is 1 (no compression)
+    if not compress_rate:
+        return target
+    return cv2.resize(target, (0, 0), fx=compress_rate, fy=compress_rate, interpolation=interpolation)
+
+
 def fix_location(shape: typing.Sequence, location: typing.Sequence) -> typing.Sequence:
     """ location from cv2 should be left-top location, and need to fix it and make it central """
     size_y, size_x = shape
