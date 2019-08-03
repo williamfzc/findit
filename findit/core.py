@@ -47,6 +47,26 @@ class FindIt(object):
         :param need_log: enable or disable logger
         :param engine: choose image processing engine, eg: ['feature', 'template']
         :param pro_mode:
+
+        kwargs here will be used to init engine, which starts with engine_{engine_name} :
+
+            # feature
+            engine_feature_cluster_num: int = None,
+            engine_feature_distance_threshold: float = None,
+            engine_feature_min_hessian: int = None,
+
+            # ocr
+            engine_ocr_lang: str = None,
+
+            # sim
+            engine_sim_interpolation: int = None,
+
+            # template
+            engine_template_cv_method_name: str = None,
+            engine_template_scale: typing.Sequence = None,
+            engine_template_multi_target_max_threshold: float = None,
+            engine_template_multi_target_distance_threshold: float = None,
+            engine_template_compress_rate: float = None,
         """
         # template manager
         self.template: _TemplateManager = _TemplateManager()
@@ -120,6 +140,16 @@ class FindIt(object):
         :param target_pic_name: eg: 'your_target_picture_1'
         :param target_pic_path: '/path/to/your/target.png'
         :param target_pic_object: your_pic_cv_object (loaded by cv2)
+
+        kwargs here will be used to engine.execute(), which starts with engine_{engine_name}:
+
+            # ocr
+            engine_ocr_offset: int = None,
+            engine_ocr_deep: bool = None,
+
+            # template
+            engine_template_mask_pic_object: np.ndarray = None,
+            engine_template_mask_pic_path: str = None,
         :return:
         """
 
