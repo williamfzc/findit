@@ -8,7 +8,7 @@ from findit.engine.base import FindItEngine, FindItEngineResponse
 try:
     import findtext
 except ImportError:
-    warnings.warn('findtext should be installed if you want to use OCR engine')
+    logger.debug('findtext should be installed if you want to use OCR engine')
 
 
 class OCREngine(FindItEngine):
