@@ -6,8 +6,8 @@ from findit.engine.sim import SimEngine
 from findit.engine.base import FindItEngineResponse, FindItEngine
 
 engine_dict = {
-    'feature': FeatureEngine,
-    'template': TemplateEngine,
-    'ocr': OCREngine,
-    'sim': SimEngine,
+    "feature": FeatureEngine,
+    "template": TemplateEngine,
+    "ocr": OCREngine,
+    "sim": SimEngine,
 }

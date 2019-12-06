@@ -12,7 +12,7 @@ install_requirement_list = [
     "scipy",
 ]
 
-extras_require_dict = {"web": ["flask", "gevent",]}
+extras_require_dict = {"web": ["flask", "gevent"]}
 
 setup(
     name="findit",
@@ -22,7 +22,7 @@ setup(
     author_email="fengzc@vip.qq.com",
     url="https://github.com/williamfzc/findit",
     packages=find_packages(),
-    python_requires=">=3.6,<=3.7",
+    python_requires=">=3.6,<3.8",
     install_requires=install_requirement_list,
     extras_require=extras_require_dict,
 )

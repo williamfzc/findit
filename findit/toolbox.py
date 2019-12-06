@@ -10,12 +10,12 @@ import os
 from collections import namedtuple
 from scipy.spatial.distance import euclidean
 
-Point = namedtuple('Point', ('x', 'y'))
+Point = namedtuple("Point", ("x", "y"))
 
 
 def load_grey_from_path(pic_path: str) -> np.ndarray:
     """ load grey picture (with cv2) from path """
-    assert os.path.isfile(pic_path), f'picture [{pic_path}] not existed'
+    assert os.path.isfile(pic_path), f"picture [{pic_path}] not existed"
     raw_img = cv2.imread(pic_path)
     return load_grey_from_cv2_object(raw_img)
 
@@ -54,11 +54,13 @@ def decompress_point(old: typing.Tuple, compress_rate: float) -> typing.List:
     return [int(i / compress_rate) for i in old]
 
 
-def compress_frame(old: np.ndarray,
-                   compress_rate: float = None,
-                   target_size: typing.Tuple[int, int] = None,
-                   not_grey: bool = None,
-                   interpolation: int = None) -> np.ndarray:
+def compress_frame(
+    old: np.ndarray,
+    compress_rate: float = None,
+    target_size: typing.Tuple[int, int] = None,
+    not_grey: bool = None,
+    interpolation: int = None,
+) -> np.ndarray:
     """
     Compress frame
 
@@ -89,7 +91,9 @@ def compress_frame(old: np.ndarray,
     # default rate is 1 (no compression)
     if not compress_rate:
         return target
-    return cv2.resize(target, (0, 0), fx=compress_rate, fy=compress_rate, interpolation=interpolation)
+    return cv2.resize(
+        target, (0, 0), fx=compress_rate, fy=compress_rate, interpolation=interpolation
+    )
 
 
 def fix_location(shape: typing.Sequence, location: typing.Sequence) -> typing.Sequence:
@@ -99,9 +103,9 @@ def fix_location(shape: typing.Sequence, location: typing.Sequence) -> typing.Se
     return old_x + size_x / 2, old_y + size_y / 2
 
 
-def mark_point(pic_object: np.ndarray,
-               location: typing.Sequence,
-               cover: bool = None) -> np.ndarray:
+def mark_point(
+    pic_object: np.ndarray, location: typing.Sequence, cover: bool = None
+) -> np.ndarray:
     """ draw a mark on your picture, or your picture copy. """
     if not cover:
         pic_object = copy.deepcopy(pic_object)
@@ -114,26 +118,30 @@ def mark_point(pic_object: np.ndarray,
 
 
 def get_timestamp() -> str:
-    return datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    return datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
 
 @contextlib.contextmanager
 def cv2file(pic_object: np.ndarray) -> str:
     """ save cv object to file, and return its path """
-    temp_pic_file_object = tempfile.NamedTemporaryFile(mode='wb+', suffix='.png', delete=False)
+    temp_pic_file_object = tempfile.NamedTemporaryFile(
+        mode="wb+", suffix=".png", delete=False
+    )
     cv2.imwrite(temp_pic_file_object.name, pic_object)
     temp_pic_file_object_path = temp_pic_file_object.name
     yield temp_pic_file_object_path
     os.remove(temp_pic_file_object_path)
 
 
-def point_list_filter(point_list: typing.Sequence, distance: float, point_limit: int = None) -> typing.Sequence:
+def point_list_filter(
+    point_list: typing.Sequence, distance: float, point_limit: int = None
+) -> typing.Sequence:
     """ remove some points which are too close """
     if not point_limit:
         point_limit = 20
 
     point_list = sorted(list(set(point_list)), key=lambda o: o[0])
-    new_point_list = [point_list[0], ]
+    new_point_list = [point_list[0]]
     for cur_point in point_list[1:]:
         for each_confirmed_point in new_point_list:
             cur_distance = euclidean(cur_point, each_confirmed_point)
@@ -149,6 +157,6 @@ def point_list_filter(point_list: typing.Sequence, distance: float, point_limit:
 
 def debug_cv_object(target_object: np.ndarray, prefix: str) -> str:
     """ save target object as a temp picture, and return its path """
-    mark_pic_path = f'{prefix}_{get_timestamp()}.png'
+    mark_pic_path = f"{prefix}_{get_timestamp()}.png"
     cv2.imwrite(mark_pic_path, target_object)
     return mark_pic_path

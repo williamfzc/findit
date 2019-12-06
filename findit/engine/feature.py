@@ -2,6 +2,7 @@ import numpy as np
 import typing
 import cv2
 import collections
+
 # https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
 from sklearn.cluster import KMeans
 
@@ -18,12 +19,15 @@ class FeatureEngine(FindItEngine):
     # higher -> less
     DEFAULT_MIN_HESSIAN: int = 200
 
-    def __init__(self,
-                 engine_feature_cluster_num: int = None,
-                 engine_feature_distance_threshold: float = None,
-                 engine_feature_min_hessian: int = None,
-                 *_, **__):
-        logger.info(f'engine {self.get_type()} preparing ...')
+    def __init__(
+        self,
+        engine_feature_cluster_num: int = None,
+        engine_feature_distance_threshold: float = None,
+        engine_feature_min_hessian: int = None,
+        *_,
+        **__,
+    ):
+        logger.info(f"engine {self.get_type()} preparing ...")
 
         # for kmeans calculation
         self.engine_feature_cluster_num: int = engine_feature_cluster_num or self.DEFAULT_CLUSTER_NUM
@@ -33,25 +37,24 @@ class FeatureEngine(FindItEngine):
         # higher threshold, less points
         self.engine_feature_min_hessian: int = engine_feature_min_hessian or self.DEFAULT_MIN_HESSIAN
 
-        logger.debug(f'cluster num: {self.engine_feature_cluster_num}')
-        logger.debug(f'distance threshold: {self.engine_feature_distance_threshold}')
-        logger.debug(f'hessian threshold: {self.engine_feature_min_hessian}')
-        logger.info(f'engine {self.get_type()} loaded')
+        logger.debug(f"cluster num: {self.engine_feature_cluster_num}")
+        logger.debug(f"distance threshold: {self.engine_feature_distance_threshold}")
+        logger.debug(f"hessian threshold: {self.engine_feature_min_hessian}")
+        logger.info(f"engine {self.get_type()} loaded")
 
-    def execute(self,
-                template_object: np.ndarray,
-                target_object: np.ndarray,
-                *_, **__) -> FindItEngineResponse:
+    def execute(
+        self, template_object: np.ndarray, target_object: np.ndarray, *_, **__
+    ) -> FindItEngineResponse:
         resp = FindItEngineResponse()
-        resp.append('conf', self.__dict__)
+        resp.append("conf", self.__dict__)
 
         point_list = self.get_feature_point_list(template_object, target_object)
 
         # no point found
         if not point_list:
-            resp.append('target_point', (-1, -1), important=True)
-            resp.append('raw', 'not found')
-            resp.append('ok', False, important=True)
+            resp.append("target_point", (-1, -1), important=True)
+            resp.append("raw", "not found")
+            resp.append("ok", False, important=True)
             return resp
 
         center_point = self.calculate_center_point(point_list)
@@ -59,15 +62,15 @@ class FeatureEngine(FindItEngine):
         readable_center_point = list(center_point)
         readable_point_list = [list(each) for each in point_list]
 
-        resp.append('target_point', readable_center_point, important=True)
-        resp.append('feature_point_num', len(readable_point_list), important=True)
-        resp.append('raw', readable_point_list)
-        resp.append('ok', True, important=True)
+        resp.append("target_point", readable_center_point, important=True)
+        resp.append("feature_point_num", len(readable_point_list), important=True)
+        resp.append("raw", readable_point_list)
+        resp.append("ok", True, important=True)
         return resp
 
-    def get_feature_point_list(self,
-                               template_pic_object: np.ndarray,
-                               target_pic_object: np.ndarray) -> typing.Sequence[Point]:
+    def get_feature_point_list(
+        self, template_pic_object: np.ndarray, target_pic_object: np.ndarray
+    ) -> typing.Sequence[Point]:
         """
         compare via feature matching
 
@@ -83,8 +86,8 @@ class FeatureEngine(FindItEngine):
         target_kp, target_desc = surf.detectAndCompute(target_pic_object, None)
 
         # key points count
-        logger.debug(f'template key point count: {len(template_kp)}')
-        logger.debug(f'target key point count: {len(target_kp)}')
+        logger.debug(f"template key point count: {len(template_kp)}")
+        logger.debug(f"target key point count: {len(target_kp)}")
 
         # find 2 points, which are the closest
         # 找到帧和帧之间的一致性的过程就是在一个描述符集合（询问集）中找另一个集合（相当于训练集）的最近邻。 这里找到 每个描述符 的 最近邻与次近邻
@@ -95,7 +98,7 @@ class FeatureEngine(FindItEngine):
         # matches are something like:
         # [[<DMatch 0x12400a350>, <DMatch 0x12400a430>], [<DMatch 0x124d6a170>, <DMatch 0x124d6a450>]]
 
-        logger.debug(f'matches num: {len(matches)}')
+        logger.debug(f"matches num: {len(matches)}")
 
         # TODO here is a sample to show feature points
         # temp = cv2.drawMatchesKnn(template_pic_object, kp1, target_pic_object, kp2, matches, None, flags=2)
@@ -133,5 +136,7 @@ class FeatureEngine(FindItEngine):
             cluster_num = self.engine_feature_cluster_num
 
         k_means = KMeans(n_clusters=cluster_num).fit(np_point_list)
-        mode_label_index = sorted(collections.Counter(k_means.labels_).items(), key=lambda x: x[1])[-1][0]
+        mode_label_index = sorted(
+            collections.Counter(k_means.labels_).items(), key=lambda x: x[1]
+        )[-1][0]
         return Point(*k_means.cluster_centers_[mode_label_index])
