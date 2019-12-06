@@ -6,13 +6,13 @@ install_requirement_list = [
     "imutils",
     "numpy",
     "loguru",
-    "opencv-contrib-python==3.4.2.17",
+    "opencv-contrib-python>=3.4.2.17,<=3.4.8.29",
     "scikit-learn",
     "scikit-image",
-    "flask",
-    "gevent",
     "scipy",
 ]
+
+extras_require_dict = {"web": ["flask", "gevent",]}
 
 setup(
     name="findit",
@@ -24,4 +24,5 @@ setup(
     packages=find_packages(),
     python_requires=">=3.6",
     install_requires=install_requirement_list,
+    extras_require=extras_require_dict,
 )
