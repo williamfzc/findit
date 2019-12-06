@@ -140,7 +140,16 @@ class TemplateEngine(FindItEngine):
         # logger.debug('scale search result: {}'.format(result_list))
 
         # get the best one
-        loc_val, point_list, shape = sorted(result_list, key=lambda i: i[0][1])[-1]
+        try:
+            loc_val, point_list, shape = sorted(result_list, key=lambda i: i[0][1])[-1]
+        except IndexError:
+            raise IndexError(
+                """
+                template picture is larger than your target.
+                
+                1. pick another template picture.
+                2. set engine_template_scale in __init__, see demo.py for details.
+                """)
         min_val, max_val, min_loc, max_loc = loc_val
 
         # fix position
