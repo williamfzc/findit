@@ -13,11 +13,12 @@ install:
   - pip install findit-client
   - pip install Pillow
   - pip install findtext
-  - pip install .
 
 script:
+  - pip install .
   - cd sample
   - python demo.py
   - python short.py
   - cd ..
+  - pip install .[web]
   - pytest tests/
