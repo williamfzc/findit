@@ -6,7 +6,7 @@ install_requirement_list = [
     "imutils",
     "numpy",
     "loguru",
-    "opencv-contrib-python>=3.4.2.17,<=3.4.8.29",
+    "opencv-contrib-python==3.4.2.17",
     "scikit-learn",
     "scikit-image",
     "scipy",
@@ -22,7 +22,7 @@ setup(
     author_email="fengzc@vip.qq.com",
     url="https://github.com/williamfzc/findit",
     packages=find_packages(),
-    python_requires=">=3.6",
+    python_requires=">=3.6,<=3.7",
     install_requires=install_requirement_list,
     extras_require=extras_require_dict,
 )
