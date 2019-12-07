@@ -18,7 +18,7 @@ findit的最佳实践是配置在服务器上，以服务的形式满足不同�
 
 ## 服务端部署
 
-服务端需求 python3.6+，**强烈推荐**用 docker 与 docker-compose 部署。
+服务端需求 python3.6+，**推荐**用 docker 与 docker-compose 部署。
 
 ### 用 docker 部署
 
@@ -45,7 +45,7 @@ docker-compose up -d
 当然，如果你不想使用docker，你也可以直接用命令行启动 findit-server。
 
 ```bash
-pip install findit
+pip install findit[web]
 python -m findit.server --dir YOUR_PICTURE_DIR --port YOUR_PORT
 ```
 
