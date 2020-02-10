@@ -21,7 +21,7 @@ setup(
     author_email="fengzc@vip.qq.com",
     url="https://github.com/williamfzc/findit",
     packages=find_packages(),
-    python_requires=">=3.6,<3.8",
+    python_requires=">=3.6",
     install_requires=install_requirement_list,
     extras_require=extras_require_dict,
 )
