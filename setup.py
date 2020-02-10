@@ -15,7 +15,7 @@ extras_require_dict = {"web": ["flask", "gevent"]}
 
 setup(
     name="findit",
-    version="0.5.7",
+    version="0.5.8",
     description="find target icon on your picture, and get its position",
     author="williamfzc",
     author_email="fengzc@vip.qq.com",
