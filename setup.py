@@ -6,7 +6,6 @@ install_requirement_list = [
     "imutils",
     "numpy",
     "loguru",
-    "opencv-contrib-python==3.4.2.17",
     "scikit-learn",
     "scikit-image",
     "scipy",

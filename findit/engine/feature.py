@@ -78,12 +78,17 @@ class FeatureEngine(FindItEngine):
         :param target_pic_object:
         :return:
         """
-        # Initiate SURF detector
-        surf = cv2.xfeatures2d.SURF_create(self.engine_feature_min_hessian)
+        # IMPORTANT
+        # sift and surf can not be used in python >= 3.8
+        # so we switch it to ORB detector
+        # maybe not enough precisely now
 
-        # find the keypoints and descriptors with SURF
-        template_kp, template_desc = surf.detectAndCompute(template_pic_object, None)
-        target_kp, target_desc = surf.detectAndCompute(target_pic_object, None)
+        # Initiate ORB detector
+        orb = cv2.ORB_create()
+
+        # find the keypoints and descriptors with ORB
+        template_kp, template_desc = orb.detectAndCompute(template_pic_object, None)
+        target_kp, target_desc = orb.detectAndCompute(target_pic_object, None)
 
         # key points count
         logger.debug(f"template key point count: {len(template_kp)}")
@@ -93,8 +98,13 @@ class FeatureEngine(FindItEngine):
         # 找到帧和帧之间的一致性的过程就是在一个描述符集合（询问集）中找另一个集合（相当于训练集）的最近邻。 这里找到 每个描述符 的 最近邻与次近邻
         # 一个正确的匹配会更接近第一个邻居。换句话说，一个不正确的匹配，两个邻居的距离是相似的。因此，我们可以通过查看二者距离的不同来评判距匹配程度的好坏。
         # more details: https://blog.csdn.net/liangjiubujiu/article/details/80418079
-        flann = cv2.FlannBasedMatcher()
-        matches = flann.knnMatch(template_desc, target_desc, k=2)
+        # flann = cv2.FlannBasedMatcher()
+        # matches = flann.knnMatch(template_desc, target_desc, k=2)
+
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        # 特征描述子匹配
+        matches = bf.knnMatch(template_desc, target_desc, k=1)
+
         # matches are something like:
         # [[<DMatch 0x12400a350>, <DMatch 0x12400a430>], [<DMatch 0x124d6a170>, <DMatch 0x124d6a450>]]
 
@@ -105,16 +115,9 @@ class FeatureEngine(FindItEngine):
         # cv2.imshow('feature_points', temp)
         # cv2.waitKey(0)
 
-        # filter for invalid points
-        good = []
-        # only one matches
-        if len(matches) == 1:
+        good = list()
+        if matches:
             good = matches[0]
-        # more than one matches
-        else:
-            for m, n in matches:
-                if m.distance < self.engine_feature_distance_threshold * n.distance:
-                    good.append(m)
 
         # get positions
         point_list = list()
