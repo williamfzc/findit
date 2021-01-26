@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from skimage.measure import compare_ssim
+from skimage.metrics import structural_similarity
 
 from findit.logger import logger
 from findit.engine.base import FindItEngine, FindItEngineResponse
@@ -29,7 +29,7 @@ class SimEngine(FindItEngine):
         resized_target = cv2.resize(
             target_object, template_object.shape[::-1], interpolation=cv2.INTER_CUBIC
         )
-        ssim = compare_ssim(resized_target, template_object)
+        ssim = structural_similarity(resized_target, template_object)
 
         resp.append("conf", self.__dict__)
         resp.append("ssim", ssim, important=True)
